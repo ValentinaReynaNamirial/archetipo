@@ -255,7 +255,7 @@ After implementing this story, the user can: open their page and see a list of t
 #### US-008: Declare morning commitment
 
 **Epic:** EP-002 | **Priority:** HIGH | **Story Points:** 3
-**Status:** PLANNED
+**Status:** REVIEW
 
 **Story**
 As a developer,
