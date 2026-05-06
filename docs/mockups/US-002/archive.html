@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Archive Profile</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<style>
+.tabs-strip { display:flex; gap: var(--spacing-md); border-bottom: 1px solid var(--border); margin-bottom: var(--spacing-lg); }
+.tab { padding: 12px 2px; font-size: 0.875rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; display:inline-flex; gap:8px; align-items:center; }
+.tab.active { color: var(--accent-light); border-bottom-color: var(--accent); }
+.tab-count { font-family: var(--font-mono); font-size: 0.6875rem; background: var(--bg-elevated); border:1px solid var(--border); padding: 1px 7px; border-radius: 100px; color: var(--text-muted); }
+.tab.active .tab-count { background: var(--accent-dim); color: var(--accent-light); border-color: rgba(200,120,42,0.25); }
+.profile-list-faded { display:flex; flex-direction:column; gap: var(--spacing-md); filter: blur(2px); opacity: 0.5; pointer-events: none; }
+.profile-card-faded { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--spacing-lg); height: 180px; }
+
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--spacing-lg);
+}
+.modal {
+  background: var(--bg-elevated);
+  border: 1px solid rgba(224,90,78,0.35);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  width: 100%; max-width: 500px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.25s ease;
+}
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red), #c4504a, transparent);
+}
+
+.danger-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--red-dim);
+  border: 1px solid rgba(224,90,78,0.35);
+  display:flex; align-items:center; justify-content:center;
+  color: var(--red);
+  margin-bottom: var(--spacing-md);
+}
+.modal-title { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: -0.01em; margin-bottom: var(--spacing-sm); }
+.modal-text { color: var(--text-secondary); font-size: 0.9375rem; line-height: 1.65; margin-bottom: var(--spacing-md); }
+.modal-text b { color: var(--text-primary); font-weight: 500; }
+
+.consequences {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+.consequences-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.consequences ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.consequences li {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.consequences li.bad   { color: var(--red); }
+.consequences li.good  { color: var(--text-secondary); }
+.consequences li svg { flex-shrink: 0; margin-top: 3px; }
+
+.modal-footer { margin-top: var(--spacing-xl); display:flex; gap: var(--spacing-sm); justify-content: flex-end; padding-top: var(--spacing-md); border-top: 1px solid var(--border); }
+
+.btn-danger {
+  background: var(--red);
+  color: var(--text-inverse);
+  border-color: var(--red);
+}
+.btn-danger:hover { background: #ef6e62; border-color: #ef6e62; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">Oggi</div><div class="logo-sub">Daily Focus Tool</div></div>
+    <nav>
+      <div class="nav-section">
+        <div class="nav-label">Management</div>
+        <a href="../oggi/index.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>Sprint &amp; Backlog</a>
+        <a href="../oggi/team.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/><path d="M1 13c0-2.2 2.2-4 5-4M7 13c0-2.2 2.2-4 5-4"/></svg>Team Dashboard</a>
+        <a href="index.html" class="nav-item active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M2 14c0-2.5 2.7-4.5 6-4.5s6 2 6 4.5"/><path d="M11.5 3.5l1 1 2-2"/></svg>Dev Profiles</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Preview</div>
+        <a href="../oggi/dev.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M5 8h6M5 10.5h4"/></svg>Dev View</a>
+        <a href="../oggi/checkin.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5l2 2"/></svg>Check-in</a>
+        <a href="../oggi/retro.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="5" r="1"/></svg>Retrospective</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">VR</div>
+        <div><div class="t-small" style="font-weight:500">Valentina Reyna</div><div class="t-tiny t-very-muted">Manager</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-container">
+      <div class="page-header">
+        <div class="page-eyebrow">Team Onboarding</div>
+        <h1 class="t-headline">Developer Profiles</h1>
+      </div>
+      <div class="tabs-strip">
+        <a href="index.html" class="tab active">Active <span class="tab-count">5</span></a>
+        <a href="archived.html" class="tab">Archived <span class="tab-count">2</span></a>
+      </div>
+      <div class="profile-list-faded">
+        <div class="profile-card-faded"></div>
+        <div class="profile-card-faded"></div>
+        <div class="profile-card-faded"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Archive Modal -->
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="danger-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8M9 12h6"/></svg>
+    </div>
+    <div class="modal-title">Archive Marco Conti?</div>
+    <p class="modal-text">
+      Archiving moves the profile to <b>read-only history</b>. It's reversible by an admin, but the link goes dark right away.
+    </p>
+
+    <div class="consequences">
+      <div class="consequences-label">What changes</div>
+      <ul>
+        <li class="bad">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg>
+          Personal URL stops working immediately
+        </li>
+        <li class="bad">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg>
+          Removed from task assignment dropdowns
+        </li>
+        <li class="good">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green)"><path d="M3 8.5L6.5 12L13 4.5"/></svg>
+          Past commitments, retros and history are preserved
+        </li>
+        <li class="good">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green)"><path d="M3 8.5L6.5 12L13 4.5"/></svg>
+          Visible in the <b>Archived</b> tab — can be restored later
+        </li>
+      </ul>
+    </div>
+
+    <div class="modal-footer">
+      <a href="index.html" class="btn btn-secondary">Cancel</a>
+      <button class="btn btn-danger">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="12" height="3" rx="1"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6M6 9h4"/></svg>
+        Archive profile
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

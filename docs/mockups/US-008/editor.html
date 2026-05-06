@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Declare today's plan · Editor</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<link rel="stylesheet" href="us-008.css">
+</head>
+<body>
+<div class="dev-shell">
+
+  <!-- Header -->
+  <header class="dev-header">
+    <div class="brand-block">
+      <span class="brand-mark">Oggi</span>
+      <span class="brand-sub">Dev · Daily</span>
+    </div>
+    <div class="dev-identity">
+      <div class="identity-text">
+        <span class="identity-name">Filippo Marchetti</span>
+        <div class="identity-meta">
+          <span class="identity-role">Frontend</span>
+          <span class="badge badge-accent">Mid · L3</span>
+        </div>
+      </div>
+      <div class="identity-avatar">F</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="dev-main">
+
+    <!-- Hero -->
+    <div class="hero anim-fade-up">
+      <span class="oggi-mark">Oggi</span>
+      <div class="date-line">Wednesday, May 6, 2026 · Sprint 14</div>
+    </div>
+
+    <!-- Section intro -->
+    <section class="anim-fade-up anim-delay-1">
+      <div class="section-eyebrow">Today's commitment</div>
+      <h1 class="section-lede">Pick the tasks you'll <em>actually</em> work on today.</h1>
+      <p class="section-sub">
+        One commitment, made in the morning, beats drifting through the backlog.
+        Select any subset of today's tasks — at least one — and confirm in a single action.
+      </p>
+      <div class="window-meta anim-fade-up anim-delay-2">
+        <span class="meta-dot"></span>
+        <span>You can change this until <strong>mid-day check-in · 12:30</strong></span>
+      </div>
+    </section>
+
+    <!-- Task list -->
+    <section class="anim-fade-up anim-delay-3">
+      <div class="section-eyebrow" style="color:var(--text-muted)">Today · 4 tasks</div>
+
+      <div class="task-list">
+        <article class="task-row priority-1 selected" onclick="toggleTask(this,'t1')" id="t1">
+          <div class="checkbox">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg>
+          </div>
+          <div class="task-priority-num">01</div>
+          <div class="task-body">
+            <div class="task-title">Fix the auth callback race on slow OAuth providers</div>
+            <div class="task-tags">
+              <span class="badge badge-red badge-dot">Blocker</span>
+              <span class="badge badge-muted">PR-241</span>
+            </div>
+            <p class="task-rationale">
+              Blocking three QA runs and Sara is waiting on it before she can sign off the release branch.
+              Tackle it first — even a partial fix unblocks the rest of the team.
+            </p>
+          </div>
+        </article>
+
+        <article class="task-row priority-2" onclick="toggleTask(this,'t2')" id="t2">
+          <div class="checkbox">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg>
+          </div>
+          <div class="task-priority-num">02</div>
+          <div class="task-body">
+            <div class="task-title">Wire the new <em>Sprint</em> selector into the dashboard header</div>
+            <div class="task-tags">
+              <span class="badge badge-yellow badge-dot">In progress</span>
+              <span class="badge badge-muted">US-005</span>
+            </div>
+            <p class="task-rationale">
+              You started this yesterday and the API contract is already in place. Closing it today keeps
+              Marco's backend work from going cold.
+            </p>
+          </div>
+        </article>
+
+        <article class="task-row priority-3" onclick="toggleTask(this,'t3')" id="t3">
+          <div class="checkbox">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg>
+          </div>
+          <div class="task-priority-num">03</div>
+          <div class="task-body">
+            <div class="task-title">Review Marco's PR on the Profile API endpoints</div>
+            <div class="task-tags">
+              <span class="badge badge-blue badge-dot">Review</span>
+              <span class="badge badge-muted">PR-238</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="task-row priority-3" onclick="toggleTask(this,'t4')" id="t4">
+          <div class="checkbox">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg>
+          </div>
+          <div class="task-priority-num">04</div>
+          <div class="task-body">
+            <div class="task-title">Refactor the date-formatter helper to use Intl.DateTimeFormat</div>
+            <div class="task-tags">
+              <span class="badge badge-muted badge-dot">Tech debt</span>
+              <span class="badge badge-muted">US-009</span>
+            </div>
+            <p class="task-rationale" style="border-left-color:var(--border)">
+              Low urgency, but it's the kind of clean-up that pays back across the codebase.
+              Pick it up only if the first three close before lunch.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="dev-foot">
+    <span>Oggi · Dev surface</span>
+    <span class="foot-token">
+      <span>Your link</span>
+      <span class="foot-token-value">/dev/8f2a…b41c</span>
+    </span>
+  </footer>
+
+</div>
+
+<!-- Sticky confirm bar -->
+<div class="confirm-bar">
+  <div class="confirm-inner">
+    <div class="confirm-counter">
+      <span class="confirm-count-num" id="count">1</span>
+      <span class="confirm-count-label" id="countLabel">task selected for today</span>
+    </div>
+    <button class="btn btn-primary btn-lg" onclick="window.location.href='confirmed.html'" id="confirmBtn">
+      Confirm today's plan
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const sel = { t1: true, t2: false, t3: false, t4: false };
+
+function toggleTask(el, id) {
+  sel[id] = !sel[id];
+  el.classList.toggle('selected', sel[id]);
+  updateCount();
+}
+
+function updateCount() {
+  const n = Object.values(sel).filter(Boolean).length;
+  const num = document.getElementById('count');
+  const label = document.getElementById('countLabel');
+  const btn = document.getElementById('confirmBtn');
+  num.textContent = n;
+  if (n === 0) {
+    label.textContent = 'select at least one task';
+    btn.classList.add('is-disabled');
+  } else {
+    label.textContent = n === 1 ? 'task selected for today' : 'tasks selected for today';
+    btn.classList.remove('is-disabled');
+  }
+}
+updateCount();
+</script>
+</body>
+</html>

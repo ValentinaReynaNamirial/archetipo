@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Today's plan · Locked</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<link rel="stylesheet" href="us-008.css">
+</head>
+<body>
+<div class="dev-shell">
+
+  <!-- Header -->
+  <header class="dev-header">
+    <div class="brand-block">
+      <span class="brand-mark">Oggi</span>
+      <span class="brand-sub">Dev · Daily</span>
+    </div>
+    <div class="dev-identity">
+      <div class="identity-text">
+        <span class="identity-name">Filippo Marchetti</span>
+        <div class="identity-meta">
+          <span class="identity-role">Frontend</span>
+          <span class="badge badge-accent">Mid · L3</span>
+        </div>
+      </div>
+      <div class="identity-avatar">F</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="dev-main" style="padding-bottom: var(--spacing-2xl)">
+
+    <!-- Hero -->
+    <div class="hero anim-fade-up">
+      <span class="oggi-mark">Oggi</span>
+      <div class="date-line">Wednesday, May 6, 2026 · Sprint 14</div>
+    </div>
+
+    <!-- Section intro -->
+    <section class="anim-fade-up anim-delay-1">
+      <div class="section-eyebrow" style="color:var(--text-muted)">Your daily contract · Locked</div>
+      <h1 class="section-lede">Mid-day check-in started — your plan is set.</h1>
+      <p class="section-sub">
+        At 12:30 the morning window closed. The tasks below are the commitment you signed up for —
+        focus on those, and use the check-in to flag anything that needs to move tomorrow.
+      </p>
+    </section>
+
+    <!-- Plan panel — locked -->
+    <section class="anim-fade-up anim-delay-3">
+      <div class="plan-panel is-locked">
+        <div class="plan-head">
+          <div class="plan-title-block">
+            <span class="plan-eyebrow">Today's plan · 06 May 2026</span>
+            <h2 class="plan-title">Locked at 12:30</h2>
+          </div>
+          <span class="committed-seal locked-seal">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            Locked
+          </span>
+        </div>
+
+        <div class="lock-band">
+          <div class="lock-glyph">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <div class="lock-text">
+            <div class="lock-title">Locked — mid-day check-in started.</div>
+            <div class="lock-sub">Plan opens again tomorrow morning. To flag a change, use the check-in.</div>
+          </div>
+          <a href="../oggi/checkin.html" class="btn btn-secondary btn-sm">
+            Mid-day check-in
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <div class="plan-list">
+          <div class="plan-item">
+            <div class="plan-marker">01</div>
+            <div class="plan-item-body">
+              <div class="plan-item-title">Fix the auth callback race on slow OAuth providers</div>
+              <div class="plan-item-tags">
+                <span class="badge badge-red badge-dot">Blocker</span>
+                <span class="badge badge-muted">PR-241</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="plan-item">
+            <div class="plan-marker">02</div>
+            <div class="plan-item-body">
+              <div class="plan-item-title">Wire the new Sprint selector into the dashboard header</div>
+              <div class="plan-item-tags">
+                <span class="badge badge-yellow badge-dot">In progress</span>
+                <span class="badge badge-muted">US-005</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="plan-foot">
+          <span><strong>2 tasks</strong> · committed 09:14 · locked 12:30 · read-only</span>
+          <span style="display:inline-flex; align-items:center; gap:6px; color:var(--text-muted)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            Editing closed for today
+          </span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="dev-foot">
+    <span>Oggi · Dev surface</span>
+    <span class="foot-token">
+      <span>Your link</span>
+      <span class="foot-token-value">/dev/8f2a…b41c</span>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

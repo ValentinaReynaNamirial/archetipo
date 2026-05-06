@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Archived Profiles</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<style>
+.tabs-strip { display:flex; gap: var(--spacing-md); border-bottom: 1px solid var(--border); margin-bottom: var(--spacing-lg); }
+.tab { padding: 12px 2px; font-size: 0.875rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; display:inline-flex; gap:8px; align-items:center; cursor: pointer; transition: color 0.15s; }
+.tab:hover { color: var(--text-primary); }
+.tab.active { color: var(--accent-light); border-bottom-color: var(--accent); }
+.tab-count { font-family: var(--font-mono); font-size: 0.6875rem; background: var(--bg-elevated); border:1px solid var(--border); padding: 1px 7px; border-radius: 100px; color: var(--text-muted); }
+.tab.active .tab-count { background: var(--accent-dim); color: var(--accent-light); border-color: rgba(200,120,42,0.25); }
+
+.archived-banner {
+  display: flex; align-items: center; gap: var(--spacing-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--text-muted);
+  border-radius: var(--radius-md);
+  padding: 12px var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+.archived-banner svg { color: var(--text-muted); flex-shrink: 0; }
+
+/* Read-only profile rows */
+.archived-list { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+
+.archived-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: grid;
+  grid-template-columns: 40px 1fr auto auto auto;
+  gap: var(--spacing-md);
+  align-items: center;
+  opacity: 0.85;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.archived-row:hover { opacity: 1; border-color: var(--border-accent); }
+
+.archived-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.archived-info .archived-name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  text-decoration-color: var(--border-accent);
+  text-decoration-thickness: 1px;
+}
+
+.archived-meta { display: flex; gap: var(--spacing-xs); margin-top: 4px; }
+
+.archived-date {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+.archived-date small { display: block; font-size: 0.625rem; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px; }
+
+.url-disabled {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  background: rgba(224,90,78,0.08);
+  border: 1px dashed rgba(224,90,78,0.25);
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--red);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.restore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.restore-btn:hover {
+  color: var(--accent-light);
+  border-color: var(--border-accent);
+  background: var(--accent-dim);
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">Oggi</div><div class="logo-sub">Daily Focus Tool</div></div>
+    <nav>
+      <div class="nav-section">
+        <div class="nav-label">Management</div>
+        <a href="../oggi/index.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>Sprint &amp; Backlog</a>
+        <a href="../oggi/team.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/><path d="M1 13c0-2.2 2.2-4 5-4M7 13c0-2.2 2.2-4 5-4"/></svg>Team Dashboard</a>
+        <a href="index.html" class="nav-item active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M2 14c0-2.5 2.7-4.5 6-4.5s6 2 6 4.5"/><path d="M11.5 3.5l1 1 2-2"/></svg>Dev Profiles</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Preview</div>
+        <a href="../oggi/dev.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M5 8h6M5 10.5h4"/></svg>Dev View</a>
+        <a href="../oggi/checkin.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5l2 2"/></svg>Check-in</a>
+        <a href="../oggi/retro.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="5" r="1"/></svg>Retrospective</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">VR</div>
+        <div><div class="t-small" style="font-weight:500">Valentina Reyna</div><div class="t-tiny t-very-muted">Manager</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-container">
+
+      <div class="page-header anim-fade-up">
+        <div class="page-eyebrow">Team Onboarding</div>
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="t-headline">Developer Profiles</h1>
+            <div class="t-small t-muted mt-xs">History of past collaborators. Read-only.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs-strip anim-fade-up anim-delay-1">
+        <a href="index.html" class="tab">Active <span class="tab-count">5</span></a>
+        <a href="archived.html" class="tab active">Archived <span class="tab-count">2</span></a>
+      </div>
+
+      <div class="archived-banner anim-fade-up anim-delay-2">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="3" rx="1"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6M6 9h4"/></svg>
+        These profiles are inactive. Their links no longer work and they cannot be assigned to tasks. History is preserved for retros and reporting.
+      </div>
+
+      <div class="archived-list anim-fade-up anim-delay-3">
+
+        <div class="archived-row">
+          <div class="archived-avatar">EP</div>
+          <div class="archived-info">
+            <div class="archived-name">Elena Pacelli</div>
+            <div class="archived-meta">
+              <span class="badge badge-muted">Frontend</span>
+              <span class="badge badge-muted">Senior</span>
+            </div>
+          </div>
+          <span class="url-disabled">
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg>
+            Link disabled
+          </span>
+          <div class="archived-date">
+            <small>Archived</small>
+            Apr 03, 2026
+          </div>
+          <button class="restore-btn">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8a5 5 0 018-4M3 4v3h3"/><path d="M13 8a5 5 0 01-8 4M13 12V9h-3"/></svg>
+            Restore
+          </button>
+        </div>
+
+        <div class="archived-row">
+          <div class="archived-avatar">DR</div>
+          <div class="archived-info">
+            <div class="archived-name">Davide Russo</div>
+            <div class="archived-meta">
+              <span class="badge badge-muted">Backend</span>
+              <span class="badge badge-muted">Junior</span>
+            </div>
+          </div>
+          <span class="url-disabled">
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg>
+            Link disabled
+          </span>
+          <div class="archived-date">
+            <small>Archived</small>
+            Mar 19, 2026
+          </div>
+          <button class="restore-btn">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8a5 5 0 018-4M3 4v3h3"/><path d="M13 8a5 5 0 01-8 4M13 12V9h-3"/></svg>
+            Restore
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Sprints</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<style>
+.active-sprint-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+}
+.active-sprint-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light), transparent);
+}
+.active-sprint-card::after {
+  content: 'ACTIVE';
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  opacity: 0.4;
+}
+
+.sprint-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.sprint-dates {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.date-arrow {
+  color: var(--accent);
+  opacity: 0.6;
+}
+
+.progress-track {
+  margin-top: var(--spacing-md);
+  height: 4px;
+  background: var(--bg-elevated);
+  border-radius: 100px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  border-radius: 100px;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-sm);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin: var(--spacing-xl) 0 var(--spacing-md);
+}
+
+.section-divider .label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.section-divider .line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.sprint-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  gap: var(--spacing-lg);
+  align-items: center;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
+}
+.sprint-row:hover {
+  border-color: var(--border-accent);
+  background: var(--bg-card-hover);
+}
+
+.sprint-code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.04em;
+}
+
+.sprint-row-name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.sprint-row-dates {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.sprint-list { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+
+.row-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 56px;
+}
+.row-stat .num {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  line-height: 1;
+}
+.row-stat .label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">Oggi</div>
+      <div class="logo-sub">Daily Focus Tool</div>
+    </div>
+    <nav>
+      <div class="nav-section">
+        <div class="nav-label">Management</div>
+        <a href="index.html" class="nav-item active">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+            <path d="M2 6h12M5 1v3M11 1v3"/>
+          </svg>
+          Sprints
+        </a>
+        <a href="../oggi/index.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
+            <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
+          </svg>
+          Sprint &amp; Backlog
+        </a>
+        <a href="../oggi/team.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/>
+            <path d="M1 13c0-2.2 2.2-4 5-4M7 13c0-2.2 2.2-4 5-4"/>
+          </svg>
+          Team Dashboard
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Preview</div>
+        <a href="../oggi/dev.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="3" width="14" height="10" rx="1.5"/>
+            <path d="M5 8h6M5 10.5h4"/>
+          </svg>
+          Dev View
+        </a>
+        <a href="../oggi/checkin.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5l2 2"/>
+          </svg>
+          Check-in
+        </a>
+        <a href="../oggi/retro.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="5" r="1"/>
+          </svg>
+          Retrospective
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">VR</div>
+        <div>
+          <div class="t-small" style="font-weight:500">Valentina Reyna</div>
+          <div class="t-tiny t-very-muted">Manager</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="page-container">
+
+      <div class="page-header anim-fade-up">
+        <div class="page-eyebrow">Sprint Management</div>
+        <div class="flex items-center justify-between">
+          <h1 class="t-headline">Sprints</h1>
+          <div class="flex gap-sm">
+            <a href="create.html" class="btn btn-primary btn-sm">+ New Sprint</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Sprint -->
+      <div class="active-sprint-card anim-fade-up anim-delay-1">
+        <div class="sprint-meta-row">
+          <span class="badge badge-green badge-dot">Active</span>
+          <span class="t-mono t-very-muted">SPR-04</span>
+        </div>
+
+        <div class="flex items-center justify-between" style="gap:var(--spacing-lg); flex-wrap:wrap">
+          <div style="flex:1; min-width:280px">
+            <h2 class="t-title" style="font-size:1.5rem">Sprint 4 — Core Flow</h2>
+            <div class="sprint-dates">
+              <span>May 5, 2026</span>
+              <span class="date-arrow">→</span>
+              <span>May 16, 2026</span>
+              <span style="opacity:0.4">·</span>
+              <span style="color:var(--accent-light)">7 days remaining</span>
+            </div>
+          </div>
+          <div class="flex gap-lg" style="text-align:right">
+            <div>
+              <div class="t-display" style="font-size:1.75rem; color:var(--accent-light); font-family:var(--font-display)">12</div>
+              <div class="t-tiny t-very-muted">Tasks</div>
+            </div>
+            <div>
+              <div class="t-display" style="font-size:1.75rem; font-family:var(--font-display)">5</div>
+              <div class="t-tiny t-very-muted">Devs</div>
+            </div>
+            <div>
+              <div class="t-display" style="font-size:1.75rem; color:var(--green); font-family:var(--font-display)">3</div>
+              <div class="t-tiny t-very-muted">Done</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" style="width:36%"></div>
+        </div>
+        <div class="progress-meta">
+          <span>DAY 4 OF 11</span>
+          <span>36%</span>
+        </div>
+      </div>
+
+      <!-- Upcoming -->
+      <div class="section-divider anim-fade-up anim-delay-2">
+        <span class="label">Upcoming</span>
+        <span class="line"></span>
+        <span class="t-mono t-very-muted" style="font-size:0.6875rem">1</span>
+      </div>
+
+      <div class="sprint-list anim-fade-up anim-delay-2">
+        <div class="sprint-row">
+          <span class="sprint-code">SPR-05</span>
+          <div>
+            <div class="sprint-row-name">Sprint 5 — Insights &amp; Polish</div>
+            <div class="sprint-row-dates">May 19, 2026 → May 30, 2026</div>
+          </div>
+          <span class="badge badge-blue badge-dot">Upcoming</span>
+          <div class="row-stat">
+            <span class="num">0</span>
+            <span class="label">tasks</span>
+          </div>
+          <button class="icon-btn" title="More" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-muted);background:transparent;border:none;cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="3" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="8" cy="13" r="1"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Past -->
+      <div class="section-divider anim-fade-up anim-delay-3">
+        <span class="label">Past</span>
+        <span class="line"></span>
+        <span class="t-mono t-very-muted" style="font-size:0.6875rem">3</span>
+      </div>
+
+      <div class="sprint-list anim-fade-up anim-delay-3">
+        <div class="sprint-row" style="opacity:0.85">
+          <span class="sprint-code">SPR-03</span>
+          <div>
+            <div class="sprint-row-name">Sprint 3 — Foundations</div>
+            <div class="sprint-row-dates">Apr 21, 2026 → May 2, 2026</div>
+          </div>
+          <span class="badge badge-muted badge-dot">Closed</span>
+          <div class="row-stat">
+            <span class="num">14</span>
+            <span class="label">tasks</span>
+          </div>
+          <button class="icon-btn" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-muted);background:transparent;border:none;cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="3" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="8" cy="13" r="1"/></svg>
+          </button>
+        </div>
+
+        <div class="sprint-row" style="opacity:0.75">
+          <span class="sprint-code">SPR-02</span>
+          <div>
+            <div class="sprint-row-name">Sprint 2 — Discovery</div>
+            <div class="sprint-row-dates">Apr 7, 2026 → Apr 18, 2026</div>
+          </div>
+          <span class="badge badge-muted badge-dot">Closed</span>
+          <div class="row-stat">
+            <span class="num">9</span>
+            <span class="label">tasks</span>
+          </div>
+          <button class="icon-btn" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-muted);background:transparent;border:none;cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="3" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="8" cy="13" r="1"/></svg>
+          </button>
+        </div>
+
+        <div class="sprint-row" style="opacity:0.65">
+          <span class="sprint-code">SPR-01</span>
+          <div>
+            <div class="sprint-row-name">Sprint 1 — Kickoff</div>
+            <div class="sprint-row-dates">Mar 24, 2026 → Apr 4, 2026</div>
+          </div>
+          <span class="badge badge-muted badge-dot">Closed</span>
+          <div class="row-stat">
+            <span class="num">6</span>
+            <span class="label">tasks</span>
+          </div>
+          <button class="icon-btn" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-muted);background:transparent;border:none;cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="3" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="8" cy="13" r="1"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

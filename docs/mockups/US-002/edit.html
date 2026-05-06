@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Edit Profile</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<style>
+/* Page background — re-use of profile list */
+.tabs-strip { display:flex; gap: var(--spacing-md); border-bottom: 1px solid var(--border); margin-bottom: var(--spacing-lg); }
+.tab { padding: 12px 2px; font-size: 0.875rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; display:inline-flex; gap:8px; align-items:center; cursor:pointer; }
+.tab.active { color: var(--accent-light); border-bottom-color: var(--accent); }
+.tab-count { font-family: var(--font-mono); font-size: 0.6875rem; background: var(--bg-elevated); border:1px solid var(--border); padding: 1px 7px; border-radius: 100px; color: var(--text-muted); }
+.tab.active .tab-count { background: var(--accent-dim); color: var(--accent-light); border-color: rgba(200,120,42,0.25); }
+
+.profile-list-faded { display:flex; flex-direction:column; gap: var(--spacing-md); filter: blur(2px); opacity: 0.5; pointer-events: none; }
+.profile-card-faded {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  height: 180px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--spacing-lg);
+}
+.modal {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  width: 100%;
+  max-width: 540px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.25s ease;
+}
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light), transparent);
+}
+.modal-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom: var(--spacing-lg); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--border); }
+.modal-eyebrow { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.modal-title { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: -0.01em; }
+.modal-body { display:flex; flex-direction:column; gap: var(--spacing-md); }
+.modal-footer { margin-top: var(--spacing-xl); display:flex; gap: var(--spacing-sm); justify-content: flex-end; }
+
+.icon-btn-x {
+  width: 30px; height: 30px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+  border: none;
+}
+.icon-btn-x:hover { background: var(--bg-card); color: var(--text-primary); }
+
+.segmented {
+  display:grid; grid-template-columns: 1fr 1fr;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 3px; gap: 3px;
+}
+.segmented input { display:none; }
+.segmented label {
+  text-align:center; padding: 8px 10px;
+  border-radius: 5px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  cursor:pointer;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.segmented input:checked + label {
+  background: var(--accent-dim);
+  color: var(--accent-light);
+  box-shadow: inset 0 0 0 1px rgba(200,120,42,0.35);
+}
+
+.url-lock {
+  display:flex; align-items:center; gap: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.url-lock svg { color: var(--accent); flex-shrink:0; }
+.url-lock .url-token { color: var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">Oggi</div>
+      <div class="logo-sub">Daily Focus Tool</div>
+    </div>
+    <nav>
+      <div class="nav-section">
+        <div class="nav-label">Management</div>
+        <a href="../oggi/index.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+          Sprint &amp; Backlog
+        </a>
+        <a href="../oggi/team.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/><path d="M1 13c0-2.2 2.2-4 5-4M7 13c0-2.2 2.2-4 5-4"/></svg>
+          Team Dashboard
+        </a>
+        <a href="index.html" class="nav-item active">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M2 14c0-2.5 2.7-4.5 6-4.5s6 2 6 4.5"/><path d="M11.5 3.5l1 1 2-2"/></svg>
+          Dev Profiles
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Preview</div>
+        <a href="../oggi/dev.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M5 8h6M5 10.5h4"/></svg>Dev View</a>
+        <a href="../oggi/checkin.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5l2 2"/></svg>Check-in</a>
+        <a href="../oggi/retro.html" class="nav-item"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="5" r="1"/></svg>Retrospective</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">VR</div>
+        <div>
+          <div class="t-small" style="font-weight:500">Valentina Reyna</div>
+          <div class="t-tiny t-very-muted">Manager</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-container">
+      <div class="page-header">
+        <div class="page-eyebrow">Team Onboarding</div>
+        <h1 class="t-headline">Developer Profiles</h1>
+      </div>
+      <div class="tabs-strip">
+        <a href="index.html" class="tab active">Active <span class="tab-count">5</span></a>
+        <a href="archived.html" class="tab">Archived <span class="tab-count">2</span></a>
+      </div>
+      <div class="profile-list-faded">
+        <div class="profile-card-faded"></div>
+        <div class="profile-card-faded"></div>
+        <div class="profile-card-faded"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-eyebrow">Edit Profile</div>
+        <div class="modal-title">Filippo Gentile</div>
+      </div>
+      <a href="index.html" class="icon-btn-x" title="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </a>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" value="Filippo Gentile">
+      </div>
+
+      <div class="grid-2" style="gap: var(--spacing-md)">
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <div class="segmented">
+            <input type="radio" name="role" id="role-fe" checked>
+            <label for="role-fe">Frontend</label>
+            <input type="radio" name="role" id="role-be">
+            <label for="role-be">Backend</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Seniority</label>
+          <div class="segmented">
+            <input type="radio" name="seniority" id="sen-jr" checked>
+            <label for="sen-jr">Junior</label>
+            <input type="radio" name="seniority" id="sen-sr">
+            <label for="sen-sr">Senior</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Access URL <span style="color:var(--text-muted);font-style:italic;font-family:var(--font-body);text-transform:none;letter-spacing:0">— preserved across edits</span></label>
+        <div class="url-lock">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 016 0v2"/></svg>
+          <span class="url-token">oggi.app/dev/a3f9e2b1-7c8d-4e5f-9a01-2b3c4d5e6f70</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <a href="index.html" class="btn btn-secondary">Cancel</a>
+      <button class="btn btn-primary">Save changes</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

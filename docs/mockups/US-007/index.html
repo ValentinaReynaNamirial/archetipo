@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Filippo's Today</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<style>
+body { background: var(--bg-primary); }
+
+.dev-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 720px) 1fr;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* ─── Header (US-006 shell) ─────────────────────────── */
+.dev-header {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 14px var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+}
+
+.brand-block {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+}
+
+.brand-mark {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--accent-light);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.dev-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.identity-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.identity-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.identity-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: 4px;
+}
+
+.identity-role {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.identity-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--accent-light);
+}
+
+/* ─── Main ─────────────────────────────────────────────── */
+.dev-main {
+  grid-column: 2;
+  padding: var(--spacing-2xl) 0 var(--spacing-xl);
+}
+
+.hero {
+  margin-bottom: var(--spacing-xl);
+}
+
+.oggi-mark {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 9vw, 6rem);
+  line-height: 0.9;
+  color: var(--accent-light);
+  letter-spacing: -0.04em;
+  display: block;
+}
+
+.date-line {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin-top: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.date-line::before {
+  content: '';
+  display: block;
+  height: 1px;
+  width: 40px;
+  background: var(--border-accent);
+}
+
+/* Greeting */
+.greeting {
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.greeting-name {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+  letter-spacing: -0.01em;
+}
+
+.greeting-name em {
+  font-style: italic;
+  color: var(--accent-light);
+}
+
+.greeting-sub {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  max-width: 540px;
+  line-height: 1.65;
+}
+
+.greeting-sub strong { color: var(--text-primary); font-weight: 500; }
+
+/* List header */
+.list-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.list-eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.list-meta {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Task list — extends shared .task-card */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.task-card {
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
+  position: relative;
+}
+
+.task-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+}
+
+.task-priority-num {
+  width: 32px;
+  height: 32px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+.task-card.priority-1 .task-priority-num {
+  background: var(--accent-dim);
+  color: var(--accent-light);
+  border-color: var(--border-accent);
+}
+
+.task-card.priority-2 .task-priority-num {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border-color: rgba(232,200,74,0.25);
+}
+
+.task-title-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.3;
+  color: var(--text-primary);
+  letter-spacing: -0.005em;
+}
+
+.task-tags {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.task-rationale {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  font-style: italic;
+  border-left: 2px solid var(--accent-dim);
+  padding: 2px 0 2px var(--spacing-md);
+  margin: 0 0 0 calc(32px + var(--spacing-md));
+}
+
+.task-rationale.muted-rule { border-left-color: var(--border); }
+
+.no-rationale {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 0 calc(32px + var(--spacing-md));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  opacity: 0.7;
+}
+
+.no-rationale::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Footer */
+.dev-foot {
+  grid-column: 2;
+  padding: 0 0 var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.foot-token {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-transform: none;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.foot-token-value {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+</style>
+</head>
+<body>
+<div class="dev-shell">
+
+  <!-- Header (dev shell — no admin sidebar) -->
+  <header class="dev-header">
+    <div class="brand-block">
+      <span class="brand-mark">Oggi</span>
+      <span class="brand-sub">Dev · Daily</span>
+    </div>
+
+    <div class="dev-identity">
+      <div class="identity-text">
+        <span class="identity-name">Filippo Marchetti</span>
+        <div class="identity-meta">
+          <span class="identity-role">Frontend</span>
+          <span class="badge badge-accent">Mid · L3</span>
+        </div>
+      </div>
+      <div class="identity-avatar">F</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="dev-main">
+
+    <!-- Hero -->
+    <div class="hero anim-fade-up">
+      <span class="oggi-mark">Oggi</span>
+      <div class="date-line">Wednesday, May 6, 2026 · Sprint 14</div>
+    </div>
+
+    <!-- Greeting -->
+    <div class="greeting anim-fade-up anim-delay-1">
+      <div class="greeting-name">Good morning, <em>Filippo</em>.</div>
+      <div class="greeting-sub">
+        Four things matter today, in this order. <strong>Start at the top</strong> —
+        the rationale below each task is Valentina's note on why it earned its place.
+      </div>
+    </div>
+
+    <!-- Task list header -->
+    <div class="anim-fade-up anim-delay-2" style="display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-md); margin-bottom: var(--spacing-md);">
+      <div class="list-eyebrow" style="margin-bottom:0; flex: 1;">Today</div>
+      <div class="list-meta">4 tasks · in priority order</div>
+    </div>
+
+    <!-- Tasks -->
+    <section class="task-list">
+
+      <!-- 01 -->
+      <article class="task-card priority-1 anim-fade-up anim-delay-2">
+        <div class="task-head">
+          <div class="task-priority-num">01</div>
+          <div class="task-title-block">
+            <div class="task-title">Fix the auth callback race on slow OAuth providers</div>
+            <div class="task-tags">
+              <span class="badge badge-red badge-dot">Blocker</span>
+              <span class="badge badge-muted">PR-241</span>
+            </div>
+          </div>
+        </div>
+        <p class="task-rationale">
+          This is blocking three QA runs and Sara is waiting on it before she can sign off the release branch.
+          Tackle it first — even a partial fix unblocks the rest of the team.
+        </p>
+      </article>
+
+      <!-- 02 -->
+      <article class="task-card priority-2 anim-fade-up anim-delay-3">
+        <div class="task-head">
+          <div class="task-priority-num">02</div>
+          <div class="task-title-block">
+            <div class="task-title">Wire the new <em>Sprint</em> selector into the dashboard header</div>
+            <div class="task-tags">
+              <span class="badge badge-yellow badge-dot">In progress</span>
+              <span class="badge badge-muted">US-005</span>
+            </div>
+          </div>
+        </div>
+        <p class="task-rationale">
+          You started this yesterday and the API contract is already in place. Closing it today keeps
+          Marco's backend work from going cold and frees the way for US-007's content area.
+        </p>
+      </article>
+
+      <!-- 03 — no rationale -->
+      <article class="task-card priority-3 anim-fade-up anim-delay-4">
+        <div class="task-head">
+          <div class="task-priority-num">03</div>
+          <div class="task-title-block">
+            <div class="task-title">Review Marco's PR on the Profile API endpoints</div>
+            <div class="task-tags">
+              <span class="badge badge-blue badge-dot">Review</span>
+              <span class="badge badge-muted">PR-238</span>
+            </div>
+          </div>
+        </div>
+        <span class="no-rationale">No note from Valentina</span>
+      </article>
+
+      <!-- 04 -->
+      <article class="task-card priority-3 anim-fade-up anim-delay-5">
+        <div class="task-head">
+          <div class="task-priority-num">04</div>
+          <div class="task-title-block">
+            <div class="task-title">Refactor the date-formatter helper to use Intl.DateTimeFormat</div>
+            <div class="task-tags">
+              <span class="badge badge-muted badge-dot">Tech debt</span>
+              <span class="badge badge-muted">US-009</span>
+            </div>
+          </div>
+        </div>
+        <p class="task-rationale muted-rule">
+          Low urgency, but it's the kind of clean-up that pays back across the whole codebase.
+          Pick it up if the first three close before lunch — otherwise let it slide to tomorrow.
+        </p>
+      </article>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="dev-foot">
+    <span>Oggi · Dev surface</span>
+    <span class="foot-token">
+      <span>Your link</span>
+      <span class="foot-token-value">/dev/8f2a…b41c</span>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

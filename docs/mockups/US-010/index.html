@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — End-of-day Retrospective · Filippo</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<link rel="stylesheet" href="us-010.css">
+</head>
+<body>
+<div class="dev-shell">
+
+  <!-- Header (shared US-006/US-007/US-009 dev shell) -->
+  <header class="dev-header">
+    <div class="brand-block">
+      <span class="brand-mark">Oggi</span>
+      <span class="brand-sub">Dev · End of day</span>
+    </div>
+
+    <div class="dev-identity">
+      <div class="identity-text">
+        <span class="identity-name">Filippo Marchetti</span>
+        <div class="identity-meta">
+          <span class="identity-role">Frontend</span>
+          <span class="badge badge-accent">Mid · L3</span>
+        </div>
+      </div>
+      <div class="identity-avatar">F</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="dev-main">
+
+    <!-- Hero -->
+    <div class="hero anim-fade-up">
+      <span class="oggi-mark">Oggi</span>
+      <div class="date-line">Wednesday, May 6, 2026 · 17:00 · Sprint 14</div>
+    </div>
+
+    <!-- Intro -->
+    <div class="retro-intro anim-fade-up anim-delay-1">
+      <div class="retro-eyebrow">End-of-day retrospective</div>
+      <div class="retro-title">How did today land, <em>Filippo</em>?</div>
+      <p class="retro-sub">
+        Mark each task you committed to this morning with an honest outcome.
+        <strong>Done, In Progress, or Not Started</strong> — one per task.
+        Once submitted, the day is closed and outcomes can't be edited.
+      </p>
+    </div>
+
+    <!-- Form -->
+    <form class="retro-form anim-fade-up anim-delay-2" novalidate>
+
+      <!-- Row 01 — Done selected -->
+      <div class="retro-row is-answered">
+        <div class="retro-row-head">
+          <div class="retro-row-num">01</div>
+          <div class="retro-row-title-block">
+            <div class="retro-row-title">Fix the auth callback race on slow OAuth providers</div>
+            <div class="retro-row-tags">
+              <span class="badge badge-red badge-dot">Blocker</span>
+              <span class="badge badge-muted">PR-241</span>
+            </div>
+          </div>
+        </div>
+        <div class="outcome-group" role="radiogroup" aria-label="Outcome for task 01">
+          <label class="outcome-option is-selected" data-outcome="done">
+            <input type="radio" name="outcome-1" value="done" checked>
+            <span class="outcome-glyph">&#10003;</span>
+            <span>Done</span>
+          </label>
+          <label class="outcome-option" data-outcome="progress">
+            <input type="radio" name="outcome-1" value="progress">
+            <span class="outcome-glyph">&#9681;</span>
+            <span>In Progress</span>
+          </label>
+          <label class="outcome-option" data-outcome="not">
+            <input type="radio" name="outcome-1" value="not">
+            <span class="outcome-glyph">&#9675;</span>
+            <span>Not Started</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Row 02 — In Progress selected -->
+      <div class="retro-row is-answered">
+        <div class="retro-row-head">
+          <div class="retro-row-num">02</div>
+          <div class="retro-row-title-block">
+            <div class="retro-row-title">Wire the new <em>Sprint</em> selector into the dashboard header</div>
+            <div class="retro-row-tags">
+              <span class="badge badge-yellow badge-dot">In progress</span>
+              <span class="badge badge-muted">US-005</span>
+            </div>
+          </div>
+        </div>
+        <div class="outcome-group" role="radiogroup" aria-label="Outcome for task 02">
+          <label class="outcome-option" data-outcome="done">
+            <input type="radio" name="outcome-2" value="done">
+            <span class="outcome-glyph">&#10003;</span>
+            <span>Done</span>
+          </label>
+          <label class="outcome-option is-selected" data-outcome="progress">
+            <input type="radio" name="outcome-2" value="progress" checked>
+            <span class="outcome-glyph">&#9681;</span>
+            <span>In Progress</span>
+          </label>
+          <label class="outcome-option" data-outcome="not">
+            <input type="radio" name="outcome-2" value="not">
+            <span class="outcome-glyph">&#9675;</span>
+            <span>Not Started</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Row 03 — unanswered -->
+      <div class="retro-row">
+        <div class="retro-row-head">
+          <div class="retro-row-num">03</div>
+          <div class="retro-row-title-block">
+            <div class="retro-row-title">Review Marco's PR on the Profile API endpoints</div>
+            <div class="retro-row-tags">
+              <span class="badge badge-blue badge-dot">Review</span>
+              <span class="badge badge-muted">PR-238</span>
+            </div>
+          </div>
+        </div>
+        <div class="outcome-group" role="radiogroup" aria-label="Outcome for task 03">
+          <label class="outcome-option" data-outcome="done">
+            <input type="radio" name="outcome-3" value="done">
+            <span class="outcome-glyph">&#10003;</span>
+            <span>Done</span>
+          </label>
+          <label class="outcome-option" data-outcome="progress">
+            <input type="radio" name="outcome-3" value="progress">
+            <span class="outcome-glyph">&#9681;</span>
+            <span>In Progress</span>
+          </label>
+          <label class="outcome-option" data-outcome="not">
+            <input type="radio" name="outcome-3" value="not">
+            <span class="outcome-glyph">&#9675;</span>
+            <span>Not Started</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit bar -->
+      <div class="submit-bar">
+        <span class="submit-meta"><strong>2</strong> of 3 marked</span>
+        <button type="submit" class="btn btn-primary btn-lg">Submit retrospective</button>
+      </div>
+
+    </form>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="dev-foot">
+    <span>Oggi · Dev surface</span>
+    <span class="foot-token">
+      <span>Your link</span>
+      <span class="foot-token-value">/dev/8f2a…b41c</span>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

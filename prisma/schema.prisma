@@ -16,5 +16,72 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  sprints      Sprint[]
+  devProfiles  DevProfile[]
+
   @@map("users")
+}
+
+enum DevRole {
+  frontend
+  backend
+}
+
+enum DevSeniority {
+  junior
+  senior
+}
+
+model DevProfile {
+  id          String       @id @default(uuid())
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  name        String
+  role        DevRole
+  seniority   DevSeniority
+  accessToken String       @unique
+  isActive    Boolean      @default(true)
+  archivedAt  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  assignedTasks Task[]
+
+  @@index([ownerId, isActive, createdAt])
+  @@index([accessToken])
+  @@map("dev_profiles")
+}
+
+model Sprint {
+  id        String   @id @default(uuid())
+  name      String
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks     Task[]
+
+  @@index([ownerId, startDate])
+  @@map("sprints")
+}
+
+model Task {
+  id             String     @id @default(uuid())
+  sprintId       String
+  sprint         Sprint     @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  assignedDevId  String
+  assignedDev    DevProfile @relation(fields: [assignedDevId], references: [id], onDelete: Restrict)
+  title          String
+  description    String?
+  rationale      String?
+  position       Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([sprintId, position, createdAt])
+  @@index([assignedDevId])
+  @@map("tasks")
 }

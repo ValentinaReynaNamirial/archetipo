@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Filippo's Today (empty)</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<style>
+body { background: var(--bg-primary); }
+
+.dev-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 720px) 1fr;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* ─── Header (US-006 shell) ─────────────────────────── */
+.dev-header {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 14px var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+}
+
+.brand-block { display: flex; align-items: baseline; gap: var(--spacing-sm); }
+
+.brand-mark {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--accent-light);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.dev-identity { display: flex; align-items: center; gap: var(--spacing-md); }
+
+.identity-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.identity-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.identity-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: 4px;
+}
+
+.identity-role {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.identity-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--accent-light);
+}
+
+/* ─── Main ─────────────────────────────────────────────── */
+.dev-main {
+  grid-column: 2;
+  padding: var(--spacing-2xl) 0 var(--spacing-xl);
+}
+
+.hero { margin-bottom: var(--spacing-xl); }
+
+.oggi-mark {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 9vw, 6rem);
+  line-height: 0.9;
+  color: var(--accent-light);
+  letter-spacing: -0.04em;
+  display: block;
+}
+
+.date-line {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin-top: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.date-line::before {
+  content: '';
+  display: block;
+  height: 1px;
+  width: 40px;
+  background: var(--border-accent);
+}
+
+/* Greeting */
+.greeting {
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.greeting-name {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+  letter-spacing: -0.01em;
+}
+
+.greeting-name em { font-style: italic; color: var(--accent-light); }
+
+.greeting-sub {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  max-width: 540px;
+  line-height: 1.65;
+}
+
+.greeting-sub strong { color: var(--text-primary); font-weight: 500; }
+
+/* Empty placeholder */
+.placeholder-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.placeholder-eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.placeholder-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.placeholder-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(200,120,42,0.05), transparent 45%),
+    radial-gradient(circle at 80% 100%, rgba(200,120,42,0.04), transparent 45%);
+  pointer-events: none;
+}
+
+.placeholder-glyph {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px dashed var(--border-accent);
+  margin-bottom: var(--spacing-lg);
+  color: var(--accent);
+}
+
+.placeholder-glyph::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.placeholder-title {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: -0.01em;
+}
+
+.placeholder-text {
+  position: relative;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  max-width: 380px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.placeholder-meta {
+  position: relative;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.placeholder-meta .live-dot { background: var(--accent); }
+
+/* Footer */
+.dev-foot {
+  grid-column: 2;
+  padding: 0 0 var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.foot-token {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-transform: none;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.foot-token-value {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+</style>
+</head>
+<body>
+<div class="dev-shell">
+
+  <!-- Header (dev shell — no admin sidebar) -->
+  <header class="dev-header">
+    <div class="brand-block">
+      <span class="brand-mark">Oggi</span>
+      <span class="brand-sub">Dev · Daily</span>
+    </div>
+
+    <div class="dev-identity">
+      <div class="identity-text">
+        <span class="identity-name">Filippo Marchetti</span>
+        <div class="identity-meta">
+          <span class="identity-role">Frontend</span>
+          <span class="badge badge-accent">Mid · L3</span>
+        </div>
+      </div>
+      <div class="identity-avatar">F</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="dev-main">
+
+    <!-- Hero -->
+    <div class="hero anim-fade-up">
+      <span class="oggi-mark">Oggi</span>
+      <div class="date-line">Wednesday, May 6, 2026 · Sprint 14</div>
+    </div>
+
+    <!-- Greeting -->
+    <div class="greeting anim-fade-up anim-delay-1">
+      <div class="greeting-name">Good morning, <em>Filippo</em>.</div>
+      <div class="greeting-sub">
+        Nothing's been queued for you in this sprint yet. <strong>Take the breath</strong> —
+        catch up on reviews, polish what's already in flight, or pair with someone who's stuck.
+      </div>
+    </div>
+
+    <!-- Empty placeholder -->
+    <section class="anim-fade-up anim-delay-2">
+      <div class="placeholder-eyebrow">Today</div>
+
+      <div class="placeholder-card">
+        <div class="placeholder-glyph">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M8.5 12.5l2.5 2.5 4.5-5"/>
+          </svg>
+        </div>
+        <div class="placeholder-title">No tasks for today</div>
+        <div class="placeholder-text">
+          Valentina hasn't assigned anything to you in the active sprint.
+          When she does, it'll appear here in priority order, with her notes attached.
+        </div>
+        <div class="placeholder-meta">
+          <span class="live-dot"></span>
+          <span>Sprint 14 · listening</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="dev-foot">
+    <span>Oggi · Dev surface</span>
+    <span class="foot-token">
+      <span>Your link</span>
+      <span class="foot-token-value">/dev/8f2a…b41c</span>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>

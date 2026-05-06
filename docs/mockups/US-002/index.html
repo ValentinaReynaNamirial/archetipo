@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Developer Profiles</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<style>
+.profiles-layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: var(--spacing-xl);
+  align-items: start;
+}
+
+.create-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  position: sticky;
+  top: var(--spacing-xl);
+  overflow: hidden;
+}
+.create-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light), transparent);
+}
+.create-card .form-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-sm);
+}
+.create-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--spacing-xs);
+}
+.create-card .form-hint {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border);
+}
+.create-card .form-stack { display: flex; flex-direction: column; gap: var(--spacing-md); }
+.create-card .form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+}
+
+/* Segmented control */
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  gap: 3px;
+}
+.segmented input { display: none; }
+.segmented label {
+  text-align: center;
+  padding: 8px 10px;
+  border-radius: 5px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.segmented input:checked + label {
+  background: var(--accent-dim);
+  color: var(--accent-light);
+  box-shadow: inset 0 0 0 1px rgba(200,120,42,0.35);
+}
+
+/* Tabs strip */
+.tabs-strip {
+  display: flex;
+  gap: var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--spacing-lg);
+}
+.tab {
+  padding: 12px 2px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active {
+  color: var(--accent-light);
+  border-bottom-color: var(--accent);
+}
+.tab-count {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 100px;
+  color: var(--text-muted);
+}
+.tab.active .tab-count { background: var(--accent-dim); color: var(--accent-light); border-color: rgba(200,120,42,0.25); }
+
+/* Profile cards list */
+.profile-list { display: flex; flex-direction: column; gap: var(--spacing-md); }
+
+.profile-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: var(--spacing-md);
+  transition: border-color 0.15s, background 0.15s;
+}
+.profile-card:hover { border-color: var(--border-accent); }
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--accent-light);
+}
+.profile-avatar.role-frontend { background: var(--blue-dim); border-color: rgba(91,150,224,0.3); color: var(--blue); }
+.profile-avatar.role-backend  { background: var(--accent-dim); border-color: var(--border-accent); color: var(--accent-light); }
+
+.profile-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+.profile-name {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+.profile-meta {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: 6px;
+}
+
+.url-row {
+  margin-top: var(--spacing-md);
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.url-row .url-text {
+  flex: 1;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.url-row .url-text .url-host { color: var(--text-muted); }
+.url-row .url-text .url-token { color: var(--accent-light); }
+.url-row .copy-btn {
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  border-left: 1px solid var(--border);
+  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.url-row .copy-btn:hover { background: var(--bg-card-hover); color: var(--accent-light); }
+.url-row .copy-btn.copied { background: var(--green-dim); color: var(--green); }
+
+.profile-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px dashed var(--border);
+  justify-content: flex-end;
+}
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.action-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.action-btn.danger:hover { color: var(--red); border-color: rgba(224,90,78,0.25); background: var(--red-dim); }
+.action-btn.warn:hover  { color: var(--yellow); border-color: rgba(232,200,74,0.25); background: var(--yellow-dim); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: var(--spacing-xl);
+  left: 50%;
+  transform: translate(-50%, 80px);
+  background: var(--bg-elevated);
+  border: 1px solid var(--green);
+  color: var(--green);
+  padding: 10px 18px;
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transition: transform 0.25s, opacity 0.25s;
+  z-index: 200;
+}
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">Oggi</div>
+      <div class="logo-sub">Daily Focus Tool</div>
+    </div>
+    <nav>
+      <div class="nav-section">
+        <div class="nav-label">Management</div>
+        <a href="../oggi/index.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
+            <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
+          </svg>
+          Sprint &amp; Backlog
+        </a>
+        <a href="../oggi/team.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/>
+            <path d="M1 13c0-2.2 2.2-4 5-4M7 13c0-2.2 2.2-4 5-4"/>
+          </svg>
+          Team Dashboard
+        </a>
+        <a href="index.html" class="nav-item active">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="5" r="2.5"/>
+            <path d="M2 14c0-2.5 2.7-4.5 6-4.5s6 2 6 4.5"/>
+            <path d="M11.5 3.5l1 1 2-2"/>
+          </svg>
+          Dev Profiles
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Preview</div>
+        <a href="../oggi/dev.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="3" width="14" height="10" rx="1.5"/>
+            <path d="M5 8h6M5 10.5h4"/>
+          </svg>
+          Dev View
+        </a>
+        <a href="../oggi/checkin.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5l2 2"/>
+          </svg>
+          Check-in
+        </a>
+        <a href="../oggi/retro.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="5" r="1"/>
+          </svg>
+          Retrospective
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">VR</div>
+        <div>
+          <div class="t-small" style="font-weight:500">Valentina Reyna</div>
+          <div class="t-tiny t-very-muted">Manager</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-container">
+
+      <!-- Header -->
+      <div class="page-header anim-fade-up">
+        <div class="page-eyebrow">Team Onboarding</div>
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="t-headline">Developer Profiles</h1>
+            <div class="t-small t-muted mt-xs">Each developer gets a personal, link-only access. No accounts required.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-strip anim-fade-up anim-delay-1">
+        <a href="index.html" class="tab active">Active <span class="tab-count">5</span></a>
+        <a href="archived.html" class="tab">Archived <span class="tab-count">2</span></a>
+      </div>
+
+      <div class="profiles-layout">
+
+        <!-- Create panel (sticky) -->
+        <aside class="create-card anim-fade-up anim-delay-2">
+          <div class="form-eyebrow">+ New Profile</div>
+          <h2>Onboard a developer</h2>
+          <p class="form-hint">Fill the basics. We'll mint a private URL you can hand over - no signup, no password.</p>
+
+          <div class="form-stack">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-input" placeholder="e.g. Anna Moretti">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <div class="segmented">
+                <input type="radio" name="role" id="role-fe" checked>
+                <label for="role-fe">Frontend</label>
+                <input type="radio" name="role" id="role-be">
+                <label for="role-be">Backend</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Seniority</label>
+              <div class="segmented">
+                <input type="radio" name="seniority" id="sen-jr" checked>
+                <label for="sen-jr">Junior</label>
+                <input type="radio" name="seniority" id="sen-sr">
+                <label for="sen-sr">Senior</label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-ghost btn-sm" type="button">Reset</button>
+              <button class="btn btn-primary btn-sm" type="button">Generate Profile</button>
+            </div>
+          </div>
+        </aside>
+
+        <!-- List -->
+        <div class="profile-list anim-fade-up anim-delay-3">
+
+          <div class="profile-card">
+            <div class="profile-avatar role-frontend">FG</div>
+            <div>
+              <div class="profile-head">
+                <div>
+                  <div class="profile-name">Filippo Gentile</div>
+                  <div class="profile-meta">
+                    <span class="badge badge-blue">Frontend</span>
+                    <span class="badge badge-yellow">Junior</span>
+                  </div>
+                </div>
+                <span class="t-tiny t-very-muted" style="font-family:var(--font-mono)">Created May 02</span>
+              </div>
+              <div class="url-row">
+                <div class="url-text"><span class="url-host">oggi.app/dev/</span><span class="url-token">a3f9e2b1-7c8d-4e5f-9a01-2b3c4d5e6f70</span></div>
+                <button class="copy-btn" onclick="copy(this)">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4H4a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2"/><rect x="6" y="2" width="8" height="8" rx="1.5"/></svg>
+                  Copy
+                </button>
+              </div>
+              <div class="profile-actions">
+                <a href="edit.html" class="action-btn">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>
+                  Edit
+                </a>
+                <a href="regenerate.html" class="action-btn warn">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 0110-4.5M14 8a6 6 0 01-10 4.5"/><path d="M11 1v3h-3M5 15v-3h3"/></svg>
+                  Regenerate token
+                </a>
+                <a href="archive.html" class="action-btn danger">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="3" rx="1"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6M6 9h4"/></svg>
+                  Archive
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-card">
+            <div class="profile-avatar role-backend">SR</div>
+            <div>
+              <div class="profile-head">
+                <div>
+                  <div class="profile-name">Sara Ricci</div>
+                  <div class="profile-meta">
+                    <span class="badge badge-accent">Backend</span>
+                    <span class="badge badge-green">Senior</span>
+                  </div>
+                </div>
+                <span class="t-tiny t-very-muted" style="font-family:var(--font-mono)">Created Apr 28</span>
+              </div>
+              <div class="url-row">
+                <div class="url-text"><span class="url-host">oggi.app/dev/</span><span class="url-token">c7d4a1f0-8b22-4d9a-bcef-5e6f70819203</span></div>
+                <button class="copy-btn" onclick="copy(this)">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4H4a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2"/><rect x="6" y="2" width="8" height="8" rx="1.5"/></svg>
+                  Copy
+                </button>
+              </div>
+              <div class="profile-actions">
+                <a href="edit.html" class="action-btn">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>
+                  Edit
+                </a>
+                <a href="regenerate.html" class="action-btn warn">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 0110-4.5M14 8a6 6 0 01-10 4.5"/><path d="M11 1v3h-3M5 15v-3h3"/></svg>
+                  Regenerate token
+                </a>
+                <a href="archive.html" class="action-btn danger">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="3" rx="1"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6M6 9h4"/></svg>
+                  Archive
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-card">
+            <div class="profile-avatar role-backend">MC</div>
+            <div>
+              <div class="profile-head">
+                <div>
+                  <div class="profile-name">Marco Conti</div>
+                  <div class="profile-meta">
+                    <span class="badge badge-accent">Backend</span>
+                    <span class="badge badge-yellow">Junior</span>
+                  </div>
+                </div>
+                <span class="t-tiny t-very-muted" style="font-family:var(--font-mono)">Created Apr 24</span>
+              </div>
+              <div class="url-row">
+                <div class="url-text"><span class="url-host">oggi.app/dev/</span><span class="url-token">e2b8c3d9-0f11-4a22-b3c4-d5e6f7081920</span></div>
+                <button class="copy-btn" onclick="copy(this)">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4H4a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2"/><rect x="6" y="2" width="8" height="8" rx="1.5"/></svg>
+                  Copy
+                </button>
+              </div>
+              <div class="profile-actions">
+                <a href="edit.html" class="action-btn">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>
+                  Edit
+                </a>
+                <a href="regenerate.html" class="action-btn warn">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 0110-4.5M14 8a6 6 0 01-10 4.5"/><path d="M11 1v3h-3M5 15v-3h3"/></svg>
+                  Regenerate token
+                </a>
+                <a href="archive.html" class="action-btn danger">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="3" rx="1"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6M6 9h4"/></svg>
+                  Archive
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-card">
+            <div class="profile-avatar role-backend">LB</div>
+            <div>
+              <div class="profile-head">
+                <div>
+                  <div class="profile-name">Luca Bianchi</div>
+                  <div class="profile-meta">
+                    <span class="badge badge-accent">Backend</span>
+                    <span class="badge badge-green">Senior</span>
+                  </div>
+                </div>
+                <span class="t-tiny t-very-muted" style="font-family:var(--font-mono)">Created Apr 24</span>
+              </div>
+              <div class="url-row">
+                <div class="url-text"><span class="url-host">oggi.app/dev/</span><span class="url-token">94f52a8c-6d18-4b3f-a219-7c84e5d61092</span></div>
+                <button class="copy-btn" onclick="copy(this)">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4H4a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2"/><rect x="6" y="2" width="8" height="8" rx="1.5"/></svg>
+                  Copy
+                </button>
+              </div>
+              <div class="profile-actions">
+                <a href="edit.html" class="action-btn">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>
+                  Edit
+                </a>
+                <a href="regenerate.html" class="action-btn warn">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 0110-4.5M14 8a6 6 0 01-10 4.5"/><path d="M11 1v3h-3M5 15v-3h3"/></svg>
+                  Regenerate token
+                </a>
+                <a href="archive.html" class="action-btn danger">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="3" rx="1"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6M6 9h4"/></svg>
+                  Archive
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-card">
+            <div class="profile-avatar role-frontend">AM</div>
+            <div>
+              <div class="profile-head">
+                <div>
+                  <div class="profile-name">Anna Moretti</div>
+                  <div class="profile-meta">
+                    <span class="badge badge-blue">Frontend</span>
+                    <span class="badge badge-yellow">Junior</span>
+                  </div>
+                </div>
+                <span class="t-tiny t-very-muted" style="font-family:var(--font-mono)">Created Apr 18</span>
+              </div>
+              <div class="url-row">
+                <div class="url-text"><span class="url-host">oggi.app/dev/</span><span class="url-token">7f3e9b21-4a05-4c8d-b6e2-1834d5a2c0fb</span></div>
+                <button class="copy-btn" onclick="copy(this)">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4H4a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2"/><rect x="6" y="2" width="8" height="8" rx="1.5"/></svg>
+                  Copy
+                </button>
+              </div>
+              <div class="profile-actions">
+                <a href="edit.html" class="action-btn">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>
+                  Edit
+                </a>
+                <a href="regenerate.html" class="action-btn warn">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 0110-4.5M14 8a6 6 0 01-10 4.5"/><path d="M11 1v3h-3M5 15v-3h3"/></svg>
+                  Regenerate token
+                </a>
+                <a href="archive.html" class="action-btn danger">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="3" rx="1"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6M6 9h4"/></svg>
+                  Archive
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast">
+  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5L6.5 12L13 4.5"/></svg>
+  Link copied to clipboard
+</div>
+
+<script>
+function copy(btn) {
+  const url = btn.parentElement.querySelector('.url-text').innerText;
+  navigator.clipboard && navigator.clipboard.writeText(url);
+  btn.classList.add('copied');
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5L6.5 12L13 4.5"/></svg> Copied';
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    btn.classList.remove('copied');
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4H4a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2"/><rect x="6" y="2" width="8" height="8" rx="1.5"/></svg> Copy';
+  }, 1800);
+}
+</script>
+</body>
+</html>

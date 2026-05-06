@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Link not valid</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<style>
+body { background: var(--bg-primary); }
+
+.dev-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 720px) 1fr;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* ─── Header (no dev identity — token is invalid) ─────────── */
+.dev-header {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 14px var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-block {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+}
+
+.brand-mark {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--accent-light);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.header-status {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--red);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.header-status .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+/* ─── Main ─────────────────────────────────────────────── */
+.dev-main {
+  grid-column: 2;
+  padding: var(--spacing-2xl) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Glyph */
+.invalid-glyph {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin-bottom: var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.invalid-glyph::before,
+.invalid-glyph::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+}
+.invalid-glyph::before { inset: 0; opacity: 0.7; }
+.invalid-glyph::after  { inset: 14px; border-color: var(--border-accent); }
+
+.invalid-glyph .core {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--red-dim);
+  border: 1px solid rgba(224,90,78,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--red);
+}
+
+/* Headline */
+.invalid-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--red);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+}
+
+.invalid-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--spacing-lg);
+  max-width: 520px;
+}
+
+.invalid-title em {
+  font-style: italic;
+  color: var(--accent-light);
+}
+
+.invalid-text {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  max-width: 480px;
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Token block — opaque, mono, dimmed */
+.token-frame {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-align: left;
+  margin-bottom: var(--spacing-xl);
+}
+
+.token-label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.token-value {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  word-break: break-all;
+}
+
+.token-value .strike {
+  text-decoration: line-through;
+  text-decoration-color: rgba(224,90,78,0.55);
+  text-decoration-thickness: 1px;
+}
+
+/* Help block */
+.help-block {
+  border-top: 1px solid var(--border);
+  padding-top: var(--spacing-xl);
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.help-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-xs);
+}
+
+.help-text {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.help-text strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Footer */
+.dev-foot {
+  grid-column: 2;
+  padding: var(--spacing-lg) 0 var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+</style>
+</head>
+<body>
+<div class="dev-shell">
+
+  <!-- Header -->
+  <header class="dev-header">
+    <div class="brand-block">
+      <span class="brand-mark">Oggi</span>
+      <span class="brand-sub">Dev · Daily</span>
+    </div>
+    <div class="header-status">
+      <span class="dot"></span>
+      <span>Link not valid</span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="dev-main">
+
+    <div class="invalid-glyph anim-fade-up">
+      <div class="core">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.5 4.5L4.5 10.5"/>
+          <path d="M13.5 13.5l6 6"/>
+          <path d="M14 8a4 4 0 0 1 0 5.66l-1.5 1.5a4 4 0 1 1-5.66-5.66L8.5 8"/>
+          <path d="M10 16a4 4 0 0 1 0-5.66L11.5 8.84a4 4 0 1 1 5.66 5.66L15.5 16"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="invalid-eyebrow anim-fade-up anim-delay-1">Section unavailable</div>
+
+    <h1 class="invalid-title anim-fade-up anim-delay-1">
+      This <em>link</em> isn't valid.
+    </h1>
+
+    <p class="invalid-text anim-fade-up anim-delay-2">
+      We can't open a daily page for this address. The link may have been
+      mistyped, or it's no longer in service.
+    </p>
+
+    <div class="token-frame anim-fade-up anim-delay-2">
+      <span class="token-label">Address requested</span>
+      <span class="token-value">/dev/<span class="strike">8f2a4c91-3d7b-4e2f-9a18-c0b6e7d34b1c</span></span>
+    </div>
+
+    <div class="help-block anim-fade-up anim-delay-3">
+      <div class="help-eyebrow">What now</div>
+      <div class="help-text">
+        If you received this link from <strong>Valentina</strong>, check the original
+        message — opening the link directly from there avoids typos. If you copy-pasted
+        it, make sure no characters were dropped.
+      </div>
+      <div class="help-text">
+        Still nothing? Reply to Valentina and ask for a fresh link.
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer (no login CTA — dev surface never asks to sign in) -->
+  <footer class="dev-foot">
+    <span>Oggi · Dev surface</span>
+    <span>No account required</span>
+  </footer>
+
+</div>
+</body>
+</html>

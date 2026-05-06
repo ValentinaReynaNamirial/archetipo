@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Reorder failed</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<style>
+.crumbs {
+  display: flex; align-items: center; gap: var(--spacing-sm);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+  letter-spacing: 0.04em;
+}
+.crumbs a { color: var(--text-secondary); }
+.crumbs a:hover { color: var(--accent-light); }
+.crumbs .sep { color: var(--accent); opacity: 0.5; }
+.crumbs .current { color: var(--text-primary); }
+
+.sprint-strip {
+  background: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--spacing-xl);
+}
+.sprint-strip::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light), transparent);
+}
+.sprint-strip-meta { display: flex; gap: var(--spacing-sm); align-items: center; margin-bottom: var(--spacing-sm); flex-wrap: wrap; }
+.sprint-dates {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: var(--spacing-xs);
+  display: flex; align-items: center; gap: var(--spacing-sm);
+}
+.sprint-dates .arrow { color: var(--accent); opacity: 0.6; }
+
+.stat-cluster { display: flex; gap: var(--spacing-xl); }
+.stat-cluster .num { font-family: var(--font-display); font-size: 1.75rem; line-height: 1; }
+.stat-cluster .lab { font-family: var(--font-mono); font-size: 0.625rem; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+
+.section-divider {
+  display: flex; align-items: center; gap: var(--spacing-md);
+  margin: 0 0 var(--spacing-md);
+}
+.section-divider .label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.section-divider .line { flex: 1; height: 1px; background: var(--border); }
+.section-divider .count { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-muted); }
+
+.backlog-list { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+
+.task-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 10px;
+  display: grid;
+  grid-template-columns: 22px 56px 1fr 220px auto;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+/* the row that just rolled back — flashes red briefly */
+.task-row.rolled-back {
+  border-color: rgba(224,90,78,0.4);
+  background: linear-gradient(90deg, rgba(224,90,78,0.06), transparent 70%);
+  animation: shake-rollback 0.5s ease;
+}
+@keyframes shake-rollback {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+
+.rollback-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--red);
+  background: var(--red-dim);
+  padding: 2px 8px;
+  border-radius: 100px;
+  margin-left: 8px;
+  border: 1px solid rgba(224,90,78,0.25);
+  animation: tag-fade 2s ease forwards;
+}
+@keyframes tag-fade { 0% { opacity: 1; } 100% { opacity: 0.6; } }
+
+.drag-handle {
+  width: 22px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
+.pos-cell { display: flex; align-items: center; }
+.pos-input {
+  width: 36px; height: 28px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-align: center;
+  -moz-appearance: textfield;
+  outline: none;
+}
+.pos-input::-webkit-outer-spin-button,
+.pos-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.task-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+  display: flex; align-items: center;
+}
+.task-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.task-desc.empty { color: var(--text-muted); font-style: italic; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 4px 10px 4px 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+}
+.chip-avatar {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+}
+.chip-avatar.fe { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(91,150,224,0.3); }
+.chip-avatar.be { background: var(--accent-dim); color: var(--accent-light); border: 1px solid var(--border-accent); }
+.chip-name { font-size: 0.8125rem; color: var(--text-primary); }
+.chip-role {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding-left: 6px;
+  border-left: 1px solid var(--border);
+  margin-left: 2px;
+}
+
+.row-actions { display: flex; gap: 2px; opacity: 0.55; }
+.icon-btn {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+/* ── TOAST ─────────────────────────────────────────────────────── */
+.toast-wrap {
+  position: fixed;
+  right: var(--spacing-xl);
+  bottom: var(--spacing-xl);
+  z-index: 100;
+  display: flex; flex-direction: column; gap: var(--spacing-sm);
+  animation: toast-slide 0.35s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes toast-slide {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.toast {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(224,90,78,0.15);
+  padding: var(--spacing-md) var(--spacing-lg);
+  width: 380px;
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+.toast::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red), rgba(224,90,78,0.3));
+  animation: toast-progress 6s linear forwards;
+}
+@keyframes toast-progress { from { width: 100%; } to { width: 0%; } }
+
+.toast-icon {
+  width: 32px; height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--red-dim);
+  border: 1px solid rgba(224,90,78,0.25);
+  color: var(--red);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.toast-body { flex: 1; min-width: 0; }
+.toast-title {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.toast-msg {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.toast-meta {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+.toast-meta .code {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  color: var(--red);
+}
+.toast-meta .move {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--text-secondary);
+}
+.toast-meta .move .strike { text-decoration: line-through; color: var(--text-muted); }
+
+.toast-actions {
+  display: flex; gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+.toast-btn {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.toast-btn-primary {
+  background: var(--red);
+  color: var(--bg-primary);
+  border-color: var(--red);
+  font-weight: 500;
+}
+.toast-btn-primary:hover {
+  background: #f06b5e;
+  border-color: #f06b5e;
+}
+.toast-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+.toast-btn-ghost:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.toast-close {
+  position: absolute;
+  top: 8px; right: 10px;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.toast-close:hover { color: var(--text-primary); background: var(--bg-elevated); }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">Oggi</div>
+      <div class="logo-sub">Daily Focus Tool</div>
+    </div>
+    <nav>
+      <div class="nav-section">
+        <div class="nav-label">Management</div>
+        <a href="../US-001/list.html" class="nav-item active">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+            <path d="M2 6h12M5 1v3M11 1v3"/>
+          </svg>
+          Sprints
+        </a>
+        <a href="../oggi/index.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
+            <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
+          </svg>
+          Sprint &amp; Backlog
+        </a>
+        <a href="../oggi/team.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/>
+            <path d="M1 13c0-2.2 2.2-4 5-4M7 13c0-2.2 2.2-4 5-4"/>
+          </svg>
+          Team Dashboard
+        </a>
+        <a href="../US-002/index.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="5" r="2.5"/><path d="M2 14c0-2.5 2.7-4.5 6-4.5s6 2 6 4.5"/><path d="M11.5 3.5l1 1 2-2"/>
+          </svg>
+          Dev Profiles
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Preview</div>
+        <a href="../oggi/dev.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="3" width="14" height="10" rx="1.5"/>
+            <path d="M5 8h6M5 10.5h4"/>
+          </svg>
+          Dev View
+        </a>
+        <a href="../oggi/checkin.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5l2 2"/>
+          </svg>
+          Check-in
+        </a>
+        <a href="../oggi/retro.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="5" r="1"/>
+          </svg>
+          Retrospective
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">VR</div>
+        <div>
+          <div class="t-small" style="font-weight:500">Valentina Reyna</div>
+          <div class="t-tiny t-very-muted">Manager</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-container">
+
+      <div class="crumbs">
+        <a href="../US-001/list.html">Sprints</a>
+        <span class="sep">/</span>
+        <span class="current">SPR-04 — Core Flow</span>
+      </div>
+
+      <div class="page-header" style="border-bottom:none; padding-bottom:0; margin-bottom:var(--spacing-lg)">
+        <div class="page-eyebrow">Active Sprint</div>
+        <div class="flex items-center justify-between">
+          <h1 class="t-headline">Sprint 4 — Core Flow</h1>
+          <a href="../US-003/add.html" class="btn btn-primary btn-sm">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3v10M3 8h10" stroke-linecap="round"/>
+            </svg>
+            New task
+          </a>
+        </div>
+      </div>
+
+      <div class="sprint-strip">
+        <div class="flex items-center justify-between" style="gap:var(--spacing-lg); flex-wrap:wrap">
+          <div style="flex:1; min-width:280px">
+            <div class="sprint-strip-meta">
+              <span class="badge badge-green badge-dot">Active</span>
+              <span class="t-mono t-very-muted">SPR-04</span>
+            </div>
+            <div class="sprint-dates">
+              <span>May 5, 2026</span>
+              <span class="arrow">→</span>
+              <span>May 16, 2026</span>
+              <span style="opacity:0.4">·</span>
+              <span style="color:var(--accent-light)">7 days remaining</span>
+            </div>
+          </div>
+          <div class="stat-cluster">
+            <div><div class="num" style="color:var(--accent-light)">7</div><div class="lab">Tasks</div></div>
+            <div><div class="num">4</div><div class="lab">Devs</div></div>
+            <div><div class="num" style="color:var(--green)">2</div><div class="lab">Done</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span class="label">Backlog · ordered by priority</span>
+        <span class="line"></span>
+        <span class="count">7</span>
+      </div>
+
+      <div class="backlog-list">
+
+        <div class="task-row">
+          <span class="drag-handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+              <circle cx="3" cy="3" r="0.9" fill="currentColor"/><circle cx="7" cy="3" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="7" r="0.9" fill="currentColor"/><circle cx="7" cy="7" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="11" r="0.9" fill="currentColor"/><circle cx="7" cy="11" r="0.9" fill="currentColor"/>
+            </svg>
+          </span>
+          <div class="pos-cell"><input class="pos-input" type="number" value="1"></div>
+          <div>
+            <div class="task-title">Set up sprint detail route &amp; layout</div>
+            <div class="task-desc">Wire <code style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted)">/sprints/[id]</code> with header, dates, stats and slot for the backlog list.</div>
+          </div>
+          <div class="chip"><div class="chip-avatar fe">FG</div><span class="chip-name">Filippo Gentile</span><span class="chip-role">FE</span></div>
+          <div class="row-actions">
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-8 8H3v-3z"/><path d="M9 4l3 3"/></svg></span>
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5h4V4M5 4l1 10h4l1-10"/></svg></span>
+          </div>
+        </div>
+
+        <div class="task-row">
+          <span class="drag-handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+              <circle cx="3" cy="3" r="0.9" fill="currentColor"/><circle cx="7" cy="3" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="7" r="0.9" fill="currentColor"/><circle cx="7" cy="7" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="11" r="0.9" fill="currentColor"/><circle cx="7" cy="11" r="0.9" fill="currentColor"/>
+            </svg>
+          </span>
+          <div class="pos-cell"><input class="pos-input" type="number" value="2"></div>
+          <div>
+            <div class="task-title">Tasks API — POST /tasks (create)</div>
+            <div class="task-desc">Validate title (required) and assignee (must be active DevProfile), return 201 with task payload.</div>
+          </div>
+          <div class="chip"><div class="chip-avatar be">MR</div><span class="chip-name">Marco Rinaldi</span><span class="chip-role">BE</span></div>
+          <div class="row-actions">
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-8 8H3v-3z"/><path d="M9 4l3 3"/></svg></span>
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5h4V4M5 4l1 10h4l1-10"/></svg></span>
+          </div>
+        </div>
+
+        <div class="task-row">
+          <span class="drag-handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+              <circle cx="3" cy="3" r="0.9" fill="currentColor"/><circle cx="7" cy="3" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="7" r="0.9" fill="currentColor"/><circle cx="7" cy="7" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="11" r="0.9" fill="currentColor"/><circle cx="7" cy="11" r="0.9" fill="currentColor"/>
+            </svg>
+          </span>
+          <div class="pos-cell"><input class="pos-input" type="number" value="3"></div>
+          <div>
+            <div class="task-title">Inline add-task form</div>
+            <div class="task-desc empty">No description</div>
+          </div>
+          <div class="chip"><div class="chip-avatar fe">SD</div><span class="chip-name">Sara De Luca</span><span class="chip-role">FE</span></div>
+          <div class="row-actions">
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-8 8H3v-3z"/><path d="M9 4l3 3"/></svg></span>
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5h4V4M5 4l1 10h4l1-10"/></svg></span>
+          </div>
+        </div>
+
+        <div class="task-row">
+          <span class="drag-handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+              <circle cx="3" cy="3" r="0.9" fill="currentColor"/><circle cx="7" cy="3" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="7" r="0.9" fill="currentColor"/><circle cx="7" cy="7" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="11" r="0.9" fill="currentColor"/><circle cx="7" cy="11" r="0.9" fill="currentColor"/>
+            </svg>
+          </span>
+          <div class="pos-cell"><input class="pos-input" type="number" value="4"></div>
+          <div>
+            <div class="task-title">Edit-task dialog (shadcn Dialog)</div>
+            <div class="task-desc">Reuse the same form, prefill fields, submit calls PATCH /tasks/[id]; preserve current backlog scroll.</div>
+          </div>
+          <div class="chip"><div class="chip-avatar fe">FG</div><span class="chip-name">Filippo Gentile</span><span class="chip-role">FE</span></div>
+          <div class="row-actions">
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-8 8H3v-3z"/><path d="M9 4l3 3"/></svg></span>
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5h4V4M5 4l1 10h4l1-10"/></svg></span>
+          </div>
+        </div>
+
+        <!-- THIS row was just rolled back from position 2 to 5 -->
+        <div class="task-row rolled-back">
+          <span class="drag-handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+              <circle cx="3" cy="3" r="0.9" fill="currentColor"/><circle cx="7" cy="3" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="7" r="0.9" fill="currentColor"/><circle cx="7" cy="7" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="11" r="0.9" fill="currentColor"/><circle cx="7" cy="11" r="0.9" fill="currentColor"/>
+            </svg>
+          </span>
+          <div class="pos-cell"><input class="pos-input" type="number" value="5"></div>
+          <div>
+            <div class="task-title">
+              Delete confirmation dialog
+              <span class="rollback-tag">
+                <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 8a5 5 0 0 1 9-3l1.5 1.5M13 3v3.5h-3.5"/>
+                </svg>
+                reverted
+              </span>
+            </div>
+            <div class="task-desc">Two-step destructive action with task title echoed back; soft-delete on the API.</div>
+          </div>
+          <div class="chip"><div class="chip-avatar be">LB</div><span class="chip-name">Luca Bianchi</span><span class="chip-role">BE</span></div>
+          <div class="row-actions">
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-8 8H3v-3z"/><path d="M9 4l3 3"/></svg></span>
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5h4V4M5 4l1 10h4l1-10"/></svg></span>
+          </div>
+        </div>
+
+        <div class="task-row">
+          <span class="drag-handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+              <circle cx="3" cy="3" r="0.9" fill="currentColor"/><circle cx="7" cy="3" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="7" r="0.9" fill="currentColor"/><circle cx="7" cy="7" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="11" r="0.9" fill="currentColor"/><circle cx="7" cy="11" r="0.9" fill="currentColor"/>
+            </svg>
+          </span>
+          <div class="pos-cell"><input class="pos-input" type="number" value="6"></div>
+          <div>
+            <div class="task-title">Empty backlog state</div>
+            <div class="task-desc">Friendly invite for the first task — no tasks yet message with a primary CTA.</div>
+          </div>
+          <div class="chip"><div class="chip-avatar fe">SD</div><span class="chip-name">Sara De Luca</span><span class="chip-role">FE</span></div>
+          <div class="row-actions">
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-8 8H3v-3z"/><path d="M9 4l3 3"/></svg></span>
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5h4V4M5 4l1 10h4l1-10"/></svg></span>
+          </div>
+        </div>
+
+        <div class="task-row">
+          <span class="drag-handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+              <circle cx="3" cy="3" r="0.9" fill="currentColor"/><circle cx="7" cy="3" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="7" r="0.9" fill="currentColor"/><circle cx="7" cy="7" r="0.9" fill="currentColor"/>
+              <circle cx="3" cy="11" r="0.9" fill="currentColor"/><circle cx="7" cy="11" r="0.9" fill="currentColor"/>
+            </svg>
+          </span>
+          <div class="pos-cell"><input class="pos-input" type="number" value="7"></div>
+          <div>
+            <div class="task-title">Inline validation states</div>
+            <div class="task-desc">Empty title and missing assignee — error styling on the relevant field with explanatory copy.</div>
+          </div>
+          <div class="chip"><div class="chip-avatar fe">FG</div><span class="chip-name">Filippo Gentile</span><span class="chip-role">FE</span></div>
+          <div class="row-actions">
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-8 8H3v-3z"/><path d="M9 4l3 3"/></svg></span>
+            <span class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M6 4V2.5h4V4M5 4l1 10h4l1-10"/></svg></span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ── Error toast ──────────────────────────────────────────────── -->
+<div class="toast-wrap">
+  <div class="toast">
+    <div class="toast-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M8 1.5L1.5 14h13z"/>
+        <path d="M8 6v3.5M8 11.5v0.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="toast-body">
+      <div class="toast-title">Reorder failed</div>
+      <div class="toast-msg">
+        Couldn't save the new position. Your change was reverted.
+      </div>
+      <div class="toast-meta">
+        <span class="move">
+          <span>Delete confirmation dialog</span>
+          ·
+          <span class="strike">2</span>
+          <span>→</span>
+          <span style="color:var(--text-primary)">5</span>
+        </span>
+      </div>
+      <div class="toast-meta" style="margin-top:4px">
+        <span class="code">409 CONFLICT</span>
+        <span>Sprint was updated by Marco Rinaldi</span>
+      </div>
+      <div class="toast-actions">
+        <button class="toast-btn toast-btn-primary">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px">
+            <path d="M3 8a5 5 0 0 1 9-3l1.5 1.5M13 3v3.5h-3.5"/>
+          </svg>
+          Retry
+        </button>
+        <button class="toast-btn toast-btn-ghost">Dismiss</button>
+      </div>
+    </div>
+    <button class="toast-close" aria-label="Close">
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M3 3l10 10M13 3L3 13"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+</body>
+</html>

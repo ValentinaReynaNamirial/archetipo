@@ -33,9 +33,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const protectedPrefixes = ["/dashboard", "/sprints", "/profiles"];
   if (
     !user &&
-    request.nextUrl.pathname.startsWith("/dashboard")
+    protectedPrefixes.some((prefix) => request.nextUrl.pathname.startsWith(prefix))
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/signin";

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — US-008 · Declare morning commitment</title>
+<link rel="stylesheet" href="../oggi/shared.css">
+<link rel="stylesheet" href="us-008.css">
+</head>
+<body>
+<div class="dev-shell">
+
+  <!-- Header -->
+  <header class="dev-header">
+    <div class="brand-block">
+      <span class="brand-mark">Oggi</span>
+      <span class="brand-sub">Mockup index · US-008</span>
+    </div>
+    <div class="dev-identity">
+      <div class="identity-text">
+        <span class="identity-name">Filippo Marchetti</span>
+        <div class="identity-meta">
+          <span class="identity-role">Frontend</span>
+          <span class="badge badge-accent">Mid · L3</span>
+        </div>
+      </div>
+      <div class="identity-avatar">F</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="dev-main" style="padding-bottom: var(--spacing-2xl)">
+
+    <!-- Hero -->
+    <div class="hero anim-fade-up">
+      <span class="oggi-mark">Oggi</span>
+      <div class="date-line">US-008 · Declare morning commitment</div>
+    </div>
+
+    <section class="anim-fade-up anim-delay-1">
+      <div class="section-eyebrow">Story</div>
+      <h1 class="section-lede">A quiet ritual: the dev signs the day.</h1>
+      <p class="section-sub">
+        As a developer, I want to multi-select the tasks I'll work on today and confirm
+        my commitment in a single action — a daily contract instead of drifting.
+      </p>
+      <p class="section-sub" style="margin-top:calc(-1 * var(--spacing-md));">
+        Lives at <span class="t-mono t-accent">/dev/[token]</span>, under the today's-tasks section (US-007).
+        Three visual states cover the lifecycle of a single day; one extra state shows the empty-submission guard.
+      </p>
+    </section>
+
+    <section class="anim-fade-up anim-delay-2">
+      <div class="section-eyebrow" style="color:var(--text-muted)">Four screens</div>
+
+      <div class="states-grid">
+        <a class="state-card" href="editor.html">
+          <span class="state-num">01 · Editor</span>
+          <span class="state-name">Pick today's tasks</span>
+          <span class="state-desc">
+            No commitment yet today. Multi-select with a sticky confirm bar, live counter,
+            and a meta line showing the editing window.
+          </span>
+          <span class="state-arrow">Open editor →</span>
+        </a>
+
+        <a class="state-card" href="empty.html">
+          <span class="state-num">02 · Empty submission</span>
+          <span class="state-name">Inline error</span>
+          <span class="state-desc">
+            Dev attempts to confirm with zero selections. Inline message in the confirm bar,
+            CTA disabled, no toast or modal.
+          </span>
+          <span class="state-arrow">Open guard →</span>
+        </a>
+
+        <a class="state-card" href="confirmed.html">
+          <span class="state-num">03 · Confirmed · editable</span>
+          <span class="state-name">Today's plan</span>
+          <span class="state-desc">
+            Plan persisted. Amber-bordered panel with a "Committed" seal and an "Edit my plan" affordance.
+            Non-committed tasks show muted below.
+          </span>
+          <span class="state-arrow">Open plan →</span>
+        </a>
+
+        <a class="state-card" href="locked.html">
+          <span class="state-num">04 · Locked</span>
+          <span class="state-name">Mid-day lock</span>
+          <span class="state-desc">
+            After the mid-day trigger, the plan is read-only. Lock band with glyph, desaturated chrome,
+            and a deep-link to the check-in.
+          </span>
+          <span class="state-arrow">Open locked view →</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="anim-fade-up anim-delay-3" style="margin-top: var(--spacing-2xl)">
+      <div class="section-eyebrow" style="color:var(--text-muted)">Acceptance criteria coverage</div>
+      <div class="card" style="padding: var(--spacing-lg)">
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:var(--spacing-sm);">
+          <li class="t-small t-muted">
+            <span class="t-mono t-accent" style="margin-right:var(--spacing-sm)">AC-1</span>
+            Multi-select any non-empty subset and confirm in one action — <strong style="color:var(--text-primary)">Editor</strong>.
+          </li>
+          <li class="t-small t-muted">
+            <span class="t-mono t-accent" style="margin-right:var(--spacing-sm)">AC-2</span>
+            Persisted plan is shown as "today's plan" — <strong style="color:var(--text-primary)">Confirmed</strong>.
+          </li>
+          <li class="t-small t-muted">
+            <span class="t-mono t-accent" style="margin-right:var(--spacing-sm)">AC-3</span>
+            Editable until mid-day check-in — <strong style="color:var(--text-primary)">Confirmed</strong> ↔ <strong style="color:var(--text-primary)">Editor</strong>.
+          </li>
+          <li class="t-small t-muted">
+            <span class="t-mono t-accent" style="margin-right:var(--spacing-sm)">AC-4</span>
+            Empty submission blocked with inline message — <strong style="color:var(--text-primary)">Empty</strong>.
+          </li>
+          <li class="t-small t-muted">
+            <span class="t-mono t-accent" style="margin-right:var(--spacing-sm)">AC-5</span>
+            One commitment per dev per calendar day — <strong style="color:var(--text-primary)">Locked</strong> caps the day.
+          </li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="dev-foot">
+    <span>Oggi · Dev surface · US-008 mockups</span>
+    <span class="foot-token">
+      <span>Your link</span>
+      <span class="foot-token-value">/dev/8f2a…b41c</span>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>
