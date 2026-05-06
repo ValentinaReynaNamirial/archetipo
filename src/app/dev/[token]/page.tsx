@@ -10,14 +10,18 @@ import {
   todayInOrgTz,
 } from "@/lib/commitment";
 import { formatMidDayLabel, scheduleConfig } from "@/lib/config/schedule";
+import { findTodayCheckIns, mapCheckInState } from "@/lib/checkin";
 import { InvalidLinkState } from "../_components/InvalidLinkState";
 import { TodayEmptyState } from "../_components/TodayEmptyState";
 import { CommitmentEditor } from "./_components/CommitmentEditor";
 import { CommittedPlan } from "./_components/CommittedPlan";
 import { CommitmentLocked } from "./_components/CommitmentLocked";
+import { CheckInForm } from "./_components/CheckInForm";
+import { CheckInSummary } from "./_components/CheckInSummary";
 import "../../sprints/sprints.css";
 import "./dev.css";
 import "./commitment.css";
+import "./checkin.css";
 
 export const dynamic = "force-dynamic";
 
@@ -77,6 +81,23 @@ export default async function DevDailyPage({
   const baseState = mapCommitmentState(commitment, now, scheduleConfig);
   const forceEdit = edit === "1" && baseState === "editable";
   const state = forceEdit ? "editor" : baseState;
+
+  const checkIns =
+    baseState === "locked" && commitment.taskIds.length > 0
+      ? await findTodayCheckIns(prisma, {
+          devProfileId: profile.id,
+          sprintDay: todayDate,
+        })
+      : [];
+  const checkInState = mapCheckInState(commitment.taskIds, checkIns, now, scheduleConfig);
+  const showCheckInForm =
+    !forceEdit && checkInState === "awaiting_checkin" && commitment.taskIds.length > 0;
+  const showCheckInSummary = !forceEdit && checkInState === "checked_in";
+  const submittedAt = checkIns.length > 0 ? checkIns[0]!.submittedAt : null;
+  const submittedTimeLabel = submittedAt
+    ? formatTimeInTz(submittedAt, scheduleConfig.timezone)
+    : "";
+  const submittedDateLabel = submittedAt ? formatToday(submittedAt, scheduleConfig.timezone) : "";
   const dateLine = activeSprint ? `${today} · ${activeSprint.name}` : today;
   const midDayLabel = formatMidDayLabel(scheduleConfig);
   const planDateLabel = formatPlanDate(todayDate, scheduleConfig.timezone);
@@ -136,6 +157,20 @@ export default async function DevDailyPage({
 
           {tasks.length === 0 ? (
             <TodayEmptyState sprintLabel={activeSprint?.name ?? null} />
+          ) : showCheckInSummary ? (
+            <CheckInSummary
+              committedTasks={committedTasks}
+              checkIns={checkIns}
+              devFirstName={firstName(profile.name)}
+              submittedTimeLabel={submittedTimeLabel}
+              submittedDateLabel={submittedDateLabel}
+            />
+          ) : showCheckInForm ? (
+            <CheckInForm
+              token={token}
+              committedTasks={committedTasks}
+              devFirstName={firstName(profile.name)}
+            />
           ) : state === "locked" ? (
             <CommitmentLocked
               committedTasks={committedTasks}

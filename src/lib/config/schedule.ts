@@ -24,21 +24,33 @@ function parseTimezoneEnv(name: string, fallback: string): string {
 export type ScheduleConfig = {
   midDayHour: number;
   midDayMinute: number;
+  endOfDayHour: number;
+  endOfDayMinute: number;
   timezone: string;
 };
 
 export const ORG_TIMEZONE = parseTimezoneEnv("OGGI_ORG_TIMEZONE", "Europe/Rome");
 export const MID_DAY_HOUR = parseIntEnv("OGGI_MID_DAY_HOUR", 12, 0, 23);
 export const MID_DAY_MINUTE = parseIntEnv("OGGI_MID_DAY_MINUTE", 30, 0, 59);
+export const END_OF_DAY_HOUR = parseIntEnv("OGGI_END_OF_DAY_HOUR", 18, 0, 23);
+export const END_OF_DAY_MINUTE = parseIntEnv("OGGI_END_OF_DAY_MINUTE", 0, 0, 59);
 
 export const scheduleConfig: ScheduleConfig = {
   midDayHour: MID_DAY_HOUR,
   midDayMinute: MID_DAY_MINUTE,
+  endOfDayHour: END_OF_DAY_HOUR,
+  endOfDayMinute: END_OF_DAY_MINUTE,
   timezone: ORG_TIMEZONE,
 };
 
 export function formatMidDayLabel(config: ScheduleConfig = scheduleConfig): string {
   const hh = String(config.midDayHour).padStart(2, "0");
   const mm = String(config.midDayMinute).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
+export function formatEndOfDayLabel(config: ScheduleConfig = scheduleConfig): string {
+  const hh = String(config.endOfDayHour).padStart(2, "0");
+  const mm = String(config.endOfDayMinute).padStart(2, "0");
   return `${hh}:${mm}`;
 }

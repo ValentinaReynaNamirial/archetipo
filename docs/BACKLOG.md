@@ -182,7 +182,7 @@ After implementing this story, the user can: pick two or more devs as co-assigne
 #### US-022: Shared-task behavior on dev surface and dashboard
 
 **Epic:** EP-001 | **Priority:** MEDIUM | **Story Points:** 3
-**Status:** REVIEW
+**Status:** DONE
 
 **Story**
 As a developer co-assigned to a shared task,
@@ -234,7 +234,7 @@ After implementing this story, the user can: paste the shared URL into a browser
 #### US-007: View today's tasks ordered by priority with rationale
 
 **Epic:** EP-002 | **Priority:** HIGH | **Story Points:** 3
-**Status:** REVIEW
+**Status:** DONE
 
 **Story**
 As a developer,
@@ -255,7 +255,7 @@ After implementing this story, the user can: open their page and see a list of t
 #### US-008: Declare morning commitment
 
 **Epic:** EP-002 | **Priority:** HIGH | **Story Points:** 3
-**Status:** REVIEW
+**Status:** DONE
 
 **Story**
 As a developer,
@@ -284,7 +284,7 @@ After implementing this story, the user can: tick a subset of today's tasks, pre
 #### US-009: Respond to mid-day check-in
 
 **Epic:** EP-003 | **Priority:** HIGH | **Story Points:** 5
-**Status:** PLANNED
+**Status:** REVIEW
 
 **Story**
 As a developer,

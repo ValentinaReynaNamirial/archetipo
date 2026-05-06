@@ -6,8 +6,8 @@ import {
   todayInOrgTz,
 } from "./commitment";
 
-const ROME = { midDayHour: 12, midDayMinute: 30, timezone: "Europe/Rome" };
-const UTC = { midDayHour: 12, midDayMinute: 30, timezone: "UTC" };
+const ROME = { midDayHour: 12, midDayMinute: 30, endOfDayHour: 18, endOfDayMinute: 0, timezone: "Europe/Rome" };
+const UTC = { midDayHour: 12, midDayMinute: 30, endOfDayHour: 18, endOfDayMinute: 0, timezone: "UTC" };
 
 test("isCommitmentEditable returns true well before the cutoff (Rome)", () => {
   const now = new Date("2026-05-06T07:00:00Z");
