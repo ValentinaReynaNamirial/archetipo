@@ -17,8 +17,7 @@ export type TaskRowData = {
   title: string;
   description: string | null;
   rationale: string | null;
-  assignedDevId: string;
-  assignee: DevOption;
+  assignees: DevOption[];
 };
 
 type Dialog =

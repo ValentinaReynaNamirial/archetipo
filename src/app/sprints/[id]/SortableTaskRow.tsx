@@ -35,9 +35,9 @@ export function SortableTaskRow({
     setDraftPosition(String(position));
   }, [position]);
 
-  const initials = avatarInitials(task.assignee.name);
-  const roleClass = task.assignee.role === "frontend" ? "fe" : "be";
-  const roleLabel = task.assignee.role === "frontend" ? "FE" : "BE";
+  const MAX_VISIBLE_ASSIGNEES = 3;
+  const visibleAssignees = task.assignees.slice(0, MAX_VISIBLE_ASSIGNEES);
+  const overflowCount = task.assignees.length - visibleAssignees.length;
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -110,10 +110,33 @@ export function SortableTaskRow({
           </div>
         )}
       </div>
-      <div className="task-chip">
-        <div className={`task-chip-avatar ${roleClass}`}>{initials}</div>
-        <span className="task-chip-name">{task.assignee.name}</span>
-        <span className="task-chip-role">{roleLabel}</span>
+      <div
+        className="task-chip-list"
+        style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}
+      >
+        {visibleAssignees.map((dev) => {
+          const initials = avatarInitials(dev.name);
+          const roleClass = dev.role === "frontend" ? "fe" : "be";
+          const roleLabel = dev.role === "frontend" ? "FE" : "BE";
+          return (
+            <div className="task-chip" key={dev.id}>
+              <div className={`task-chip-avatar ${roleClass}`}>{initials}</div>
+              <span className="task-chip-name">{dev.name}</span>
+              <span className="task-chip-role">{roleLabel}</span>
+            </div>
+          );
+        })}
+        {overflowCount > 0 && (
+          <div
+            className="task-chip"
+            title={task.assignees
+              .slice(MAX_VISIBLE_ASSIGNEES)
+              .map((d) => d.name)
+              .join(", ")}
+          >
+            <span className="task-chip-name">+{overflowCount}</span>
+          </div>
+        )}
       </div>
       <div className="row-actions">
         <button type="button" className="icon-btn" title="Edit" aria-label="Edit task" onClick={onEdit}>

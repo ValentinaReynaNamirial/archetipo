@@ -44,13 +44,15 @@ export function TaskFormDialog({
   const [title, setTitle] = useState(task?.title ?? "");
   const [description, setDescription] = useState(task?.description ?? "");
   const [rationale, setRationale] = useState(task?.rationale ?? "");
-  const [assignedDevId, setAssignedDevId] = useState<string>(
-    task?.assignedDevId ?? devProfiles[0]?.id ?? ""
-  );
+  const [assignedDevIds, setAssignedDevIds] = useState<string[]>(() => {
+    if (task) return task.assignees.map((a) => a.id);
+    const first = devProfiles[0]?.id;
+    return first ? [first] : [];
+  });
 
   const fieldErrors = state?.ok === false ? state.fieldErrors : {};
   const titleError = fieldErrors.title;
-  const assigneeError = fieldErrors.assignedDevId;
+  const assigneeError = fieldErrors.assigneeIds;
   const rationaleError = fieldErrors.rationale;
   const formError = state?.ok === false ? state.formError : undefined;
   const rationaleCount = rationale.length;
@@ -79,7 +81,14 @@ export function TaskFormDialog({
     startTransition(() => formAction(formData));
   };
 
-  const blocking = !title.trim() || !assignedDevId || rationaleOver;
+  const toggleAssignee = (id: string) => {
+    setAssignedDevIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const blocking =
+    !title.trim() || assignedDevIds.length === 0 || rationaleOver;
 
   const eyebrow =
     mode === "create" ? `New Task · ${sprintCode}` : `Edit Task · ${sprintCode}`;
@@ -205,27 +214,31 @@ export function TaskFormDialog({
           )}
 
           <div className="form-group">
-            <label className="form-label">Assignee</label>
-            <input type="hidden" name="assignedDevId" value={assignedDevId} />
+            <label className="form-label">
+              Assignees <span className="optional-tag">- one or more</span>
+            </label>
+            {assignedDevIds.map((id) => (
+              <input key={id} type="hidden" name="assigneeIds" value={id} />
+            ))}
             {devProfiles.length === 0 ? (
               <div className="field-error">
                 <span>No active developer profiles. Create one first.</span>
               </div>
             ) : (
-              <div className="assignee-options" role="radiogroup" aria-label="Assignee">
+              <div className="assignee-options" role="group" aria-label="Assignees">
                 {devProfiles.map((dev) => {
                   const initials = devInitials(dev.name);
                   const roleClass = dev.role === "frontend" ? "fe" : "be";
                   const roleLabel = dev.role === "frontend" ? "FE" : "BE";
-                  const selected = dev.id === assignedDevId;
+                  const selected = assignedDevIds.includes(dev.id);
                   return (
                     <button
                       key={dev.id}
                       type="button"
-                      role="radio"
+                      role="checkbox"
                       aria-checked={selected}
                       className={`assignee-option${selected ? " selected" : ""}`}
-                      onClick={() => setAssignedDevId(dev.id)}
+                      onClick={() => toggleAssignee(dev.id)}
                     >
                       <div className={`opt-avatar ${roleClass}`}>{initials}</div>
                       <span className="opt-name">{dev.name}</span>

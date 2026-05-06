@@ -158,7 +158,7 @@ After implementing this story, the user can: open a task, write a rationale note
 #### US-021: Support multiple assignees per task
 
 **Epic:** EP-001 | **Priority:** MEDIUM | **Story Points:** 3
-**Status:** PLANNED
+**Status:** REVIEW
 
 **Story**
 As Valentina,
@@ -182,7 +182,7 @@ After implementing this story, the user can: pick two or more devs as co-assigne
 #### US-022: Shared-task behavior on dev surface and dashboard
 
 **Epic:** EP-001 | **Priority:** MEDIUM | **Story Points:** 3
-**Status:** PLANNED
+**Status:** REVIEW
 
 **Story**
 As a developer co-assigned to a shared task,

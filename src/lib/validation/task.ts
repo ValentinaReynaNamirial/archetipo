@@ -14,6 +14,21 @@ const rationaleField = z
     return trimmed.length === 0 ? null : trimmed;
   });
 
+const assigneeIdsField = z
+  .array(z.string().uuid("Invalid assignee id"))
+  .min(1, "At least one assignee is required")
+  .transform((ids) => {
+    const seen = new Set<string>();
+    const unique: string[] = [];
+    for (const id of ids) {
+      if (!seen.has(id)) {
+        seen.add(id);
+        unique.push(id);
+      }
+    }
+    return unique;
+  });
+
 export const createTaskSchema = z.object({
   sprintId: z.string().uuid("Invalid sprint id"),
   title: z
@@ -30,7 +45,7 @@ export const createTaskSchema = z.object({
       const trimmed = value.trim();
       return trimmed.length === 0 ? undefined : trimmed;
     }),
-  assignedDevId: z.string().uuid("Assignee is required"),
+  assigneeIds: assigneeIdsField,
   rationale: rationaleField,
 });
 

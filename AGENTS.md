@@ -95,6 +95,10 @@ const { data } = await supabase.storage.from("bucket").upload("path", file);
   - Select **Session Pooler** as connection method (not Direct — incompatible with IPv4)
   - Copy the connection string
 
+## Shared-task Data Contract
+
+Multi-assignee task behavior (US-022) defines a binding data contract for downstream stories US-008..US-012. See `docs/contracts/sharing.md`. In short: commitment is task-keyed (`DailyCommitment`, PK `(taskId, sprintDay)`), check-in / retro / silent-flag are per-dev (PK `(taskId, devProfileId, sprintDay)`), and `isShared(task)` is derived from `task.assignees.length > 1`. Helpers live in `src/lib/sharing.ts`.
+
 ## Archetipo Skills — Boilerplate Constraints
 
 This project ships with a fully configured boilerplate. The skills `/archetipo-inception` and `/archetipo-backlog` **must** respect the existing implementation described above.

@@ -13,6 +13,7 @@ import {
   arraysEqualInOrder,
   reorderTasksSchema,
 } from "@/lib/validation/task-order";
+import { computeAssigneeDiff } from "@/lib/validation/task-assignees";
 
 export type TaskActionResult =
   | { ok: true; taskId: string }
@@ -41,18 +42,18 @@ async function assertSprintOwnership(sprintId: string, userId: string): Promise<
   return sprint !== null;
 }
 
-async function assertAssigneeUsable(
-  assignedDevId: string,
+async function assertAssigneesUsable(
+  assigneeIds: readonly string[],
   userId: string
 ): Promise<boolean> {
-  const dev = await prisma.devProfile.findFirst({
-    where: { id: assignedDevId, ownerId: userId, isActive: true },
+  const devs = await prisma.devProfile.findMany({
+    where: { id: { in: [...assigneeIds] }, ownerId: userId, isActive: true },
     select: { id: true },
   });
-  return dev !== null;
+  return devs.length === assigneeIds.length;
 }
 
-async function validateOwnershipAndAssignee(
+async function validateOwnershipAndAssignees(
   data: CreateTaskInput | UpdateTaskInput,
   userId: string
 ): Promise<{ ok: true } | { ok: false; result: TaskActionResult }> {
@@ -63,17 +64,23 @@ async function validateOwnershipAndAssignee(
       result: { ok: false, fieldErrors: {}, formError: "Sprint not found." },
     };
   }
-  const assigneeOk = await assertAssigneeUsable(data.assignedDevId, userId);
-  if (!assigneeOk) {
+  const assigneesOk = await assertAssigneesUsable(data.assigneeIds, userId);
+  if (!assigneesOk) {
     return {
       ok: false,
       result: {
         ok: false,
-        fieldErrors: { assignedDevId: "Selected developer is not available." },
+        fieldErrors: { assigneeIds: "One or more selected developers are not available." },
       },
     };
   }
   return { ok: true };
+}
+
+function readAssigneeIds(formData: FormData): string[] {
+  return formData
+    .getAll("assigneeIds")
+    .filter((v): v is string => typeof v === "string" && v.length > 0);
 }
 
 export async function createTaskAction(
@@ -87,7 +94,7 @@ export async function createTaskAction(
     sprintId: formData.get("sprintId"),
     title: formData.get("title"),
     description: formData.get("description") ?? undefined,
-    assignedDevId: formData.get("assignedDevId"),
+    assigneeIds: readAssigneeIds(formData),
     rationale: formData.get("rationale") ?? undefined,
   });
 
@@ -95,16 +102,18 @@ export async function createTaskAction(
     return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
   }
 
-  const validation = await validateOwnershipAndAssignee(parsed.data, user.id);
+  const validation = await validateOwnershipAndAssignees(parsed.data, user.id);
   if (!validation.ok) return validation.result;
 
   const task = await prisma.task.create({
     data: {
       sprintId: parsed.data.sprintId,
-      assignedDevId: parsed.data.assignedDevId,
       title: parsed.data.title,
       description: parsed.data.description ?? null,
       rationale: parsed.data.rationale ?? null,
+      assignees: {
+        create: parsed.data.assigneeIds.map((devProfileId) => ({ devProfileId })),
+      },
     },
   });
 
@@ -124,7 +133,7 @@ export async function updateTaskAction(
     sprintId: formData.get("sprintId"),
     title: formData.get("title"),
     description: formData.get("description") ?? undefined,
-    assignedDevId: formData.get("assignedDevId"),
+    assigneeIds: readAssigneeIds(formData),
     rationale: formData.get("rationale") ?? undefined,
   });
 
@@ -132,22 +141,53 @@ export async function updateTaskAction(
     return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
   }
 
-  const validation = await validateOwnershipAndAssignee(parsed.data, user.id);
+  const validation = await validateOwnershipAndAssignees(parsed.data, user.id);
   if (!validation.ok) return validation.result;
 
-  const result = await prisma.task.updateMany({
-    where: { id: parsed.data.id, sprintId: parsed.data.sprintId },
-    data: {
-      title: parsed.data.title,
-      description: parsed.data.description ?? null,
-      assignedDevId: parsed.data.assignedDevId,
-      rationale: parsed.data.rationale ?? null,
+  const existing = await prisma.task.findFirst({
+    where: {
+      id: parsed.data.id,
+      sprintId: parsed.data.sprintId,
+      sprint: { ownerId: user.id },
     },
+    select: { id: true, assignees: { select: { devProfileId: true } } },
   });
 
-  if (result.count === 0) {
+  if (!existing) {
     return { ok: false, fieldErrors: {}, formError: "Task not found." };
   }
+
+  const currentIds = existing.assignees.map((a) => a.devProfileId);
+  const { toAdd, toRemove } = computeAssigneeDiff(currentIds, parsed.data.assigneeIds);
+
+  await prisma.$transaction([
+    prisma.task.update({
+      where: { id: parsed.data.id },
+      data: {
+        title: parsed.data.title,
+        description: parsed.data.description ?? null,
+        rationale: parsed.data.rationale ?? null,
+      },
+    }),
+    ...(toRemove.length > 0
+      ? [
+          prisma.taskAssignee.deleteMany({
+            where: { taskId: parsed.data.id, devProfileId: { in: toRemove } },
+          }),
+        ]
+      : []),
+    ...(toAdd.length > 0
+      ? [
+          prisma.taskAssignee.createMany({
+            data: toAdd.map((devProfileId) => ({
+              taskId: parsed.data.id,
+              devProfileId,
+            })),
+            skipDuplicates: true,
+          }),
+        ]
+      : []),
+  ]);
 
   revalidatePath(`/sprints/${parsed.data.sprintId}`);
   return { ok: true, taskId: parsed.data.id };

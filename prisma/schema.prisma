@@ -45,7 +45,11 @@ model DevProfile {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  assignedTasks Task[]
+  taskAssignments     TaskAssignee[]
+  createdCommitments  DailyCommitment[] @relation("DailyCommitmentCreatedBy")
+  checkIns            TaskCheckIn[]
+  retros              TaskRetro[]
+  silentFlags         TaskSilentFlag[]
 
   @@index([ownerId, isActive, createdAt])
   @@index([accessToken])
@@ -72,8 +76,6 @@ model Task {
   id             String     @id @default(uuid())
   sprintId       String
   sprint         Sprint     @relation(fields: [sprintId], references: [id], onDelete: Cascade)
-  assignedDevId  String
-  assignedDev    DevProfile @relation(fields: [assignedDevId], references: [id], onDelete: Restrict)
   title          String
   description    String?
   rationale      String?
@@ -81,7 +83,92 @@ model Task {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
+  assignees      TaskAssignee[]
+  commitments    DailyCommitment[]
+  checkIns       TaskCheckIn[]
+  retros         TaskRetro[]
+  silentFlags    TaskSilentFlag[]
+
   @@index([sprintId, position, createdAt])
-  @@index([assignedDevId])
   @@map("tasks")
+}
+
+model TaskAssignee {
+  taskId       String
+  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  devProfileId String
+  devProfile   DevProfile @relation(fields: [devProfileId], references: [id], onDelete: Restrict)
+  createdAt    DateTime   @default(now())
+
+  @@id([taskId, devProfileId])
+  @@index([devProfileId])
+  @@map("task_assignees")
+}
+
+enum CheckInStatus {
+  OnTrack
+  Blocked
+  TaskChanged
+}
+
+enum RetroOutcome {
+  Done
+  InProgress
+  NotStarted
+}
+
+model DailyCommitment {
+  taskId      String
+  task        Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  sprintDay   DateTime   @db.Date
+  createdById String
+  createdBy   DevProfile @relation("DailyCommitmentCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime   @default(now())
+
+  @@id([taskId, sprintDay])
+  @@index([sprintDay])
+  @@index([createdById])
+  @@map("daily_commitments")
+}
+
+model TaskCheckIn {
+  taskId       String
+  task         Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  devProfileId String
+  devProfile   DevProfile    @relation(fields: [devProfileId], references: [id], onDelete: Restrict)
+  sprintDay    DateTime      @db.Date
+  status       CheckInStatus
+  note         String?
+  submittedAt  DateTime      @default(now())
+
+  @@id([taskId, devProfileId, sprintDay])
+  @@index([devProfileId, sprintDay])
+  @@map("task_check_ins")
+}
+
+model TaskRetro {
+  taskId       String
+  task         Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  devProfileId String
+  devProfile   DevProfile   @relation(fields: [devProfileId], references: [id], onDelete: Restrict)
+  sprintDay    DateTime     @db.Date
+  outcome      RetroOutcome
+  submittedAt  DateTime     @default(now())
+
+  @@id([taskId, devProfileId, sprintDay])
+  @@index([devProfileId, sprintDay])
+  @@map("task_retros")
+}
+
+model TaskSilentFlag {
+  taskId       String
+  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  devProfileId String
+  devProfile   DevProfile @relation(fields: [devProfileId], references: [id], onDelete: Restrict)
+  sprintDay    DateTime   @db.Date
+  flaggedAt    DateTime   @default(now())
+
+  @@id([taskId, devProfileId, sprintDay])
+  @@index([devProfileId, sprintDay])
+  @@map("task_silent_flags")
 }

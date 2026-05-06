@@ -60,7 +60,12 @@ export default async function SprintDetailPage({
 
   const tasks = await prisma.task.findMany({
     where: { sprintId: sprint.id },
-    include: { assignedDev: true },
+    include: {
+      assignees: {
+        include: { devProfile: true },
+        orderBy: { createdAt: "asc" },
+      },
+    },
     orderBy: [{ position: "asc" }, { createdAt: "asc" }],
   });
 
@@ -78,7 +83,10 @@ export default async function SprintDetailPage({
 
   const now = new Date();
   const status = getSprintStatus(sprint, now);
-  const assigneeIds = new Set(tasks.map((t) => t.assignedDevId));
+  const assigneeIds = new Set<string>();
+  for (const t of tasks) {
+    for (const a of t.assignees) assigneeIds.add(a.devProfileId);
+  }
   const remainingDays =
     status === "active"
       ? Math.max(0, Math.ceil((sprint.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
@@ -115,12 +123,11 @@ export default async function SprintDetailPage({
                 title: t.title,
                 description: t.description,
                 rationale: t.rationale,
-                assignedDevId: t.assignedDevId,
-                assignee: {
-                  id: t.assignedDev.id,
-                  name: t.assignedDev.name,
-                  role: t.assignedDev.role,
-                },
+                assignees: t.assignees.map((a) => ({
+                  id: a.devProfile.id,
+                  name: a.devProfile.name,
+                  role: a.devProfile.role,
+                })),
               }))}
               devProfiles={devProfiles.map((p) => ({
                 id: p.id,
