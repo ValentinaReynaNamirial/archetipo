@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { findActiveProfileByToken, profileInitials, roleLabel, seniorityLabel } from "@/lib/profile";
+import { getActiveSprintForOwner } from "@/lib/sprint";
+import { getTodaysTasksForDev } from "@/lib/task";
 import { InvalidLinkState } from "../_components/InvalidLinkState";
+import { TodayTaskList } from "../_components/TodayTaskList";
+import { TodayEmptyState } from "../_components/TodayEmptyState";
 import "../../sprints/sprints.css";
 import "./dev.css";
 
@@ -34,8 +38,18 @@ export default async function DevDailyPage({
   }
 
   const initials = profileInitials(profile.name);
-  const today = formatToday(new Date());
+  const now = new Date();
+  const today = formatToday(now);
   const tokenPreview = `${profile.accessToken.slice(0, 4)}…${profile.accessToken.slice(-4)}`;
+
+  const activeSprint = await getActiveSprintForOwner(prisma, profile.ownerId, now);
+  const tasks = activeSprint
+    ? await getTodaysTasksForDev(prisma, {
+        devProfileId: profile.id,
+        sprintId: activeSprint.id,
+      })
+    : [];
+  const dateLine = activeSprint ? `${today} · ${activeSprint.name}` : today;
 
   return (
     <div className="oggi-scope">
@@ -63,7 +77,7 @@ export default async function DevDailyPage({
         <main className="dev-main">
           <div className="hero anim-fade-up">
             <span className="oggi-mark">Oggi</span>
-            <div className="date-line">{today}</div>
+            <div className="date-line">{dateLine}</div>
           </div>
 
           <div className="greeting anim-fade-up anim-delay-1">
@@ -76,37 +90,11 @@ export default async function DevDailyPage({
             </div>
           </div>
 
-          <section className="anim-fade-up anim-delay-2" data-slot="today">
-            <div className="placeholder-eyebrow">Today</div>
-
-            <div className="placeholder-card">
-              <div className="placeholder-glyph">
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>
-              </div>
-              <div className="placeholder-title">Your tasks will appear here</div>
-              <div className="placeholder-text">
-                When Valentina prepares your daily plan, this is where it lands.
-                Come back tomorrow morning - or whenever your link lights up.
-              </div>
-              <div className="placeholder-meta">
-                <span className="live-dot" />
-                <span>Listening for today&apos;s plan</span>
-              </div>
-            </div>
-          </section>
+          {tasks.length > 0 ? (
+            <TodayTaskList tasks={tasks} />
+          ) : (
+            <TodayEmptyState sprintLabel={activeSprint?.name ?? null} />
+          )}
         </main>
 
         <footer className="dev-foot">

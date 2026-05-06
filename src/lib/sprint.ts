@@ -1,4 +1,22 @@
-import type { Sprint } from "@prisma/client";
+import type { PrismaClient, Sprint } from "@prisma/client";
+
+type SprintFinder = Pick<PrismaClient["sprint"], "findFirst">;
+
+export async function getActiveSprintForOwner(
+  client: { sprint: SprintFinder },
+  ownerId: string,
+  now: Date
+): Promise<Sprint | null> {
+  if (!ownerId) return null;
+  return client.sprint.findFirst({
+    where: {
+      ownerId,
+      startDate: { lte: now },
+      endDate: { gte: now },
+    },
+    orderBy: { startDate: "desc" },
+  });
+}
 
 export type SprintStatus = "active" | "upcoming" | "past";
 

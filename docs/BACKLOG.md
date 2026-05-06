@@ -158,7 +158,7 @@ After implementing this story, the user can: open a task, write a rationale note
 #### US-021: Support multiple assignees per task
 
 **Epic:** EP-001 | **Priority:** MEDIUM | **Story Points:** 3
-**Status:** REVIEW
+**Status:** DONE
 
 **Story**
 As Valentina,
@@ -213,7 +213,7 @@ After implementing this story, the user can: open two dev pages co-assigned to t
 #### US-006: Open dev daily page via unique URL
 
 **Epic:** EP-002 | **Priority:** HIGH | **Story Points:** 2
-**Status:** REVIEW
+**Status:** DONE
 
 **Story**
 As Filippo,
@@ -234,7 +234,7 @@ After implementing this story, the user can: paste the shared URL into a browser
 #### US-007: View today's tasks ordered by priority with rationale
 
 **Epic:** EP-002 | **Priority:** HIGH | **Story Points:** 3
-**Status:** PLANNED
+**Status:** REVIEW
 
 **Story**
 As a developer,
