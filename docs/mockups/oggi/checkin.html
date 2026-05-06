@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Mid-day Check-in</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.dev-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 680px) 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+.dev-header {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 14px var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dev-main {
+  grid-column: 2;
+  padding: var(--spacing-2xl) 0;
+}
+
+.checkin-hero {
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.time-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: rgba(91,150,224,0.08);
+  border: 1px solid rgba(91,150,224,0.2);
+  border-radius: 100px;
+  padding: 5px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--blue);
+  margin-bottom: var(--spacing-md);
+}
+
+.checkin-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.1;
+  margin-bottom: var(--spacing-sm);
+}
+
+.sprint-chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 4px 12px;
+}
+
+.checkin-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+  transition: border-color 0.2s;
+}
+
+.checkin-card.answered { border-color: var(--border-accent); }
+
+.checkin-card-header {
+  padding: var(--spacing-lg);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.task-badge {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+
+.status-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+}
+
+.status-opt {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+}
+
+.status-opt:hover {
+  border-color: var(--border-accent);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.status-opt.selected-green {
+  border-color: var(--green);
+  background: var(--green-dim);
+  color: var(--green);
+}
+
+.status-opt.selected-red {
+  border-color: var(--red);
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.status-opt.selected-blue {
+  border-color: var(--blue);
+  background: var(--blue-dim);
+  color: var(--blue);
+}
+
+.status-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.status-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.blocker-input-area {
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  display: none;
+}
+
+.blocker-input-area.show { display: block; }
+
+.submit-bar {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--blue), transparent);
+}
+
+.submitted-state { display: none; }
+.submit-bar.done .pre-submit { display: none; }
+.submit-bar.done .submitted-state { display: block; }
+</style>
+</head>
+<body>
+<div class="dev-shell">
+
+  <header class="dev-header">
+    <div class="logo-mark" style="font-size:1.25rem">Oggi</div>
+    <div class="flex items-center gap-md">
+      <div class="sprint-chip">Sprint 4 · May 5–16</div>
+      <a href="retro.html" class="btn btn-secondary btn-sm">End-of-day Retro →</a>
+    </div>
+  </header>
+
+  <main class="dev-main">
+
+    <!-- Hero -->
+    <div class="checkin-hero anim-fade-up">
+      <div class="time-pill">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4l2.5 2.5"/></svg>
+        Mid-day · 12:30
+      </div>
+      <div class="checkin-title">How's your day going, Filippo?</div>
+      <div class="t-body t-muted">Quick check-in on your committed tasks. No judgement — blockers are data, not failure.</div>
+    </div>
+
+    <!-- Check-in Cards -->
+    <div id="checkinCards">
+
+      <!-- Task 1 -->
+      <div class="checkin-card anim-fade-up anim-delay-1" id="ci1">
+        <div class="checkin-card-header">
+          <div class="flex items-center gap-sm" style="flex:1">
+            <span class="task-badge">#1</span>
+            <div>
+              <div style="font-size:0.9375rem; font-weight:500">Implement morning commitment flow</div>
+              <div class="t-small t-muted mt-xs">Committed this morning</div>
+            </div>
+          </div>
+        </div>
+        <div class="status-options">
+          <button class="status-opt" onclick="selectStatus('ci1', 'green', this)">
+            <div class="status-icon">✓</div>
+            <div class="status-label">On Track</div>
+          </button>
+          <button class="status-opt" onclick="selectStatus('ci1', 'red', this)">
+            <div class="status-icon">⚑</div>
+            <div class="status-label">Blocked</div>
+          </button>
+          <button class="status-opt" onclick="selectStatus('ci1', 'blue', this)">
+            <div class="status-icon">↻</div>
+            <div class="status-label">Task Changed</div>
+          </button>
+        </div>
+        <div class="blocker-input-area" id="ci1-note">
+          <div class="form-group">
+            <label class="form-label">Tell Valentina what's blocking you</label>
+            <textarea class="form-textarea" placeholder="e.g. Can't figure out the Supabase token validation — needs backend input..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task 2 -->
+      <div class="checkin-card anim-fade-up anim-delay-2" id="ci2">
+        <div class="checkin-card-header">
+          <div class="flex items-center gap-sm" style="flex:1">
+            <span class="task-badge">#2</span>
+            <div>
+              <div style="font-size:0.9375rem; font-weight:500">Dev daily view — task list component</div>
+              <div class="t-small t-muted mt-xs">Committed this morning</div>
+            </div>
+          </div>
+        </div>
+        <div class="status-options">
+          <button class="status-opt selected-green" onclick="selectStatus('ci2', 'green', this)">
+            <div class="status-icon">✓</div>
+            <div class="status-label">On Track</div>
+          </button>
+          <button class="status-opt" onclick="selectStatus('ci2', 'red', this)">
+            <div class="status-icon">⚑</div>
+            <div class="status-label">Blocked</div>
+          </button>
+          <button class="status-opt" onclick="selectStatus('ci2', 'blue', this)">
+            <div class="status-icon">↻</div>
+            <div class="status-label">Task Changed</div>
+          </button>
+        </div>
+        <div class="blocker-input-area" id="ci2-note"></div>
+      </div>
+
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-bar mt-lg" id="submitBar">
+      <div class="pre-submit">
+        <div class="t-title" style="font-family:var(--font-display); margin-bottom:var(--spacing-sm)">Send your check-in</div>
+        <div class="t-small t-muted mb-lg">Valentina will see your status in real time on the team dashboard.</div>
+        <button class="btn btn-primary btn-lg" onclick="submitCheckin()">Send Check-in</button>
+      </div>
+      <div class="submitted-state">
+        <div style="font-size:2rem; margin-bottom:var(--spacing-sm); color:var(--blue)">✓</div>
+        <div class="t-title" style="font-family:var(--font-display); color:var(--blue)">Check-in sent.</div>
+        <div class="t-small t-muted mt-sm">Valentina has been notified. End-of-day retrospective unlocks at 17:00.</div>
+        <a href="retro.html" class="btn btn-secondary mt-lg">Preview Retrospective</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const cardStatus = { ci1: null, ci2: 'green' };
+
+function selectStatus(cardId, status, btn) {
+  const card = document.getElementById(cardId);
+  card.querySelector('.checkin-card-header');
+  card.classList.add('answered');
+
+  card.querySelectorAll('.status-opt').forEach(b => {
+    b.classList.remove('selected-green', 'selected-red', 'selected-blue');
+  });
+  btn.classList.add('selected-' + status);
+  cardStatus[cardId] = status;
+
+  const noteArea = document.getElementById(cardId + '-note');
+  if (status === 'red' || status === 'blue') {
+    noteArea.classList.add('show');
+    if (!noteArea.innerHTML.trim()) {
+      const labelText = status === 'red' ? 'Tell Valentina what\'s blocking you' : 'What changed and why?';
+      const placeholder = status === 'red'
+        ? 'e.g. Can\'t figure out token validation...'
+        : 'e.g. Urgent hotfix came in, switched to that...';
+      noteArea.innerHTML = `<div class="form-group"><label class="form-label">${labelText}</label><textarea class="form-textarea" placeholder="${placeholder}"></textarea></div>`;
+    }
+  } else {
+    noteArea.classList.remove('show');
+  }
+}
+
+function submitCheckin() {
+  document.getElementById('submitBar').classList.add('done');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Sprint Management</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.sprint-header-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+}
+.sprint-header-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light), transparent);
+}
+.sprint-dates {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: var(--spacing-sm);
+}
+.backlog-section { margin-top: var(--spacing-xl); }
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+.backlog-list { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+.task-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px var(--spacing-md);
+  display: grid;
+  grid-template-columns: 32px 1fr auto auto auto;
+  gap: var(--spacing-md);
+  align-items: center;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: grab;
+}
+.task-row:hover {
+  border-color: var(--border-accent);
+  background: var(--bg-card-hover);
+}
+.task-row.drag-handle-active { cursor: grabbing; }
+.drag-handle {
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+}
+.task-row:hover .drag-handle { opacity: 0.8; }
+.drag-handle span {
+  display: block;
+  width: 14px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+.task-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.task-name { font-size: 0.9375rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-rationale-preview { font-size: 0.8125rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; }
+.task-actions { display: flex; gap: var(--spacing-xs); }
+.icon-btn {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+  border: none; background: transparent;
+}
+.icon-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.dev-profiles-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+.dev-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 0.875rem;
+  transition: border-color 0.15s;
+}
+.dev-chip:hover { border-color: var(--border-accent); }
+.dev-chip .avatar { width: 24px; height: 24px; font-size: 0.625rem; }
+.dev-chips { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-top: var(--spacing-md); }
+.add-task-row {
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  width: 100%;
+  text-align: left;
+}
+.add-task-row:hover { border-color: var(--accent); color: var(--accent-light); }
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--spacing-lg);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  width: 100%;
+  max-width: 540px;
+  transform: translateY(16px);
+  transition: transform 0.2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); }
+.modal-title { font-family: var(--font-display); font-size: 1.25rem; }
+.modal-body { display: flex; flex-direction: column; gap: var(--spacing-md); }
+.modal-footer { margin-top: var(--spacing-xl); display: flex; gap: var(--spacing-sm); justify-content: flex-end; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">Oggi</div>
+      <div class="logo-sub">Daily Focus Tool</div>
+    </div>
+    <nav>
+      <div class="nav-section">
+        <div class="nav-label">Management</div>
+        <a href="index.html" class="nav-item active">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
+            <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
+          </svg>
+          Sprint &amp; Backlog
+        </a>
+        <a href="team.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/>
+            <path d="M1 13c0-2.2 2.2-4 5-4M7 13c0-2.2 2.2-4 5-4"/>
+          </svg>
+          Team Dashboard
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Preview</div>
+        <a href="dev.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="3" width="14" height="10" rx="1.5"/>
+            <path d="M5 8h6M5 10.5h4"/>
+          </svg>
+          Dev View
+        </a>
+        <a href="checkin.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5l2 2"/>
+          </svg>
+          Check-in
+        </a>
+        <a href="retro.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="5" r="1"/>
+          </svg>
+          Retrospective
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">VR</div>
+        <div>
+          <div class="t-small" style="font-weight:500">Valentina Reyna</div>
+          <div class="t-tiny t-very-muted">Manager</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-container">
+
+      <!-- Page Header -->
+      <div class="page-header anim-fade-up">
+        <div class="page-eyebrow">Sprint Management</div>
+        <div class="flex items-center justify-between">
+          <h1 class="t-headline">Sprint Backlog</h1>
+          <div class="flex gap-sm">
+            <button class="btn btn-secondary btn-sm" onclick="openNewSprint()">New Sprint</button>
+            <button class="btn btn-primary btn-sm" onclick="openNewTask()">+ Add Task</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sprint Card -->
+      <div class="sprint-header-card anim-fade-up anim-delay-1">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-sm mb-sm">
+              <span class="badge badge-green badge-dot">Active</span>
+              <span class="t-mono t-very-muted">SPR-04</span>
+            </div>
+            <h2 class="t-title">Sprint 4 — Core Flow</h2>
+            <div class="sprint-dates">May 5, 2026 → May 16, 2026 &nbsp;·&nbsp; 7 days remaining</div>
+          </div>
+          <div class="flex gap-lg" style="text-align:right">
+            <div>
+              <div class="t-display" style="font-size:2rem; color:var(--accent-light)">12</div>
+              <div class="t-tiny t-very-muted">Tasks</div>
+            </div>
+            <div>
+              <div class="t-display" style="font-size:2rem">5</div>
+              <div class="t-tiny t-very-muted">Devs</div>
+            </div>
+            <div>
+              <div class="t-display" style="font-size:2rem; color:var(--green)">3</div>
+              <div class="t-tiny t-very-muted">Done</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-column layout -->
+      <div style="display:grid; grid-template-columns:1fr 300px; gap:var(--spacing-xl); margin-top:var(--spacing-xl)">
+
+        <!-- Backlog -->
+        <div class="anim-fade-up anim-delay-2">
+          <div class="section-header">
+            <div>
+              <h3 class="t-title">Backlog</h3>
+              <div class="t-small t-muted mt-xs">Ordered by priority — drag to reorder</div>
+            </div>
+          </div>
+
+          <div class="backlog-list" id="backlogList">
+
+            <div class="task-row priority-1">
+              <div class="drag-handle"><span></span><span></span><span></span></div>
+              <div class="task-info">
+                <div class="flex items-center gap-sm">
+                  <span class="task-priority-num" style="color:var(--accent-light)">1</span>
+                  <span class="task-name">Implement morning commitment flow</span>
+                </div>
+                <div class="task-rationale-preview">"Unblocking the core retention loop this week"</div>
+              </div>
+              <div class="flex gap-sm items-center">
+                <div class="dev-chip" style="padding:4px 8px; font-size:0.75rem">
+                  <div class="avatar" style="width:18px;height:18px;font-size:0.5625rem">FG</div>
+                  Filippo
+                </div>
+              </div>
+              <span class="badge badge-yellow">In Progress</span>
+              <div class="task-actions">
+                <button class="icon-btn" title="Edit">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>
+                </button>
+                <button class="icon-btn" title="More">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="3" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="8" cy="13" r="1"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="task-row priority-1">
+              <div class="drag-handle"><span></span><span></span><span></span></div>
+              <div class="task-info">
+                <div class="flex items-center gap-sm">
+                  <span class="task-priority-num" style="color:var(--accent-light)">2</span>
+                  <span class="task-name">Team dashboard real-time grid</span>
+                </div>
+                <div class="task-rationale-preview">"I need visibility before end of sprint"</div>
+              </div>
+              <div class="flex gap-sm items-center">
+                <div class="dev-chip" style="padding:4px 8px; font-size:0.75rem">
+                  <div class="avatar" style="width:18px;height:18px;font-size:0.5625rem">SR</div>
+                  Sara
+                </div>
+              </div>
+              <span class="badge badge-yellow">In Progress</span>
+              <div class="task-actions">
+                <button class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg></button>
+                <button class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="3" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="8" cy="13" r="1"/></svg></button>
+              </div>
+            </div>
+
+            <div class="task-row priority-2">
+              <div class="drag-handle"><span></span><span></span><span></span></div>
+              <div class="task-info">
+                <div class="flex items-center gap-sm">
+                  <span class="task-priority-num">3</span>
+                  <span class="task-name">Mid-day check-in reminder logic</span>
+                </div>
+                <div class="task-rationale-preview">"Depends on Vercel Cron setup — do after #2"</div>
+              </div>
+              <div class="flex gap-sm items-center">
+                <div class="dev-chip" style="padding:4px 8px; font-size:0.75rem">
+                  <div class="avatar" style="width:18px;height:18px;font-size:0.5625rem">MC</div>
+                  Marco
+                </div>
+              </div>
+              <span class="badge badge-muted">Not Started</span>
+              <div class="task-actions">
+                <button class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg></button>
+                <button class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="3" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="8" cy="13" r="1"/></svg></button>
+              </div>
+            </div>
+
+            <div class="task-row priority-2">
+              <div class="drag-handle"><span></span><span></span><span></span></div>
+              <div class="task-info">
+                <div class="flex items-center gap-sm">
+                  <span class="task-priority-num">4</span>
+                  <span class="task-name">Prisma schema — Sprint & Task models</span>
+                </div>
+                <div class="task-rationale-preview">"Foundation for everything else"</div>
+              </div>
+              <div class="flex gap-sm items-center">
+                <div class="dev-chip" style="padding:4px 8px; font-size:0.75rem">
+                  <div class="avatar" style="width:18px;height:18px;font-size:0.5625rem">LB</div>
+                  Luca
+                </div>
+              </div>
+              <span class="badge badge-green">Done</span>
+              <div class="task-actions">
+                <button class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg></button>
+                <button class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="3" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="8" cy="13" r="1"/></svg></button>
+              </div>
+            </div>
+
+            <div class="task-row priority-3">
+              <div class="drag-handle"><span></span><span></span><span></span></div>
+              <div class="task-info">
+                <div class="flex items-center gap-sm">
+                  <span class="task-priority-num">5</span>
+                  <span class="task-name">Dev profile management UI</span>
+                </div>
+                <div class="task-rationale-preview">"Needed for team onboarding next sprint"</div>
+              </div>
+              <div class="flex gap-sm items-center">
+                <div class="dev-chip" style="padding:4px 8px; font-size:0.75rem">
+                  <div class="avatar" style="width:18px;height:18px;font-size:0.5625rem">AM</div>
+                  Anna
+                </div>
+              </div>
+              <span class="badge badge-muted">Not Started</span>
+              <div class="task-actions">
+                <button class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg></button>
+                <button class="icon-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="3" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="8" cy="13" r="1"/></svg></button>
+              </div>
+            </div>
+
+            <button class="add-task-row" onclick="openNewTask()">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v10M3 8h10"/></svg>
+              Add task to backlog
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="anim-fade-up anim-delay-3">
+
+          <!-- Dev Profiles -->
+          <div class="dev-profiles-section">
+            <div class="flex items-center justify-between mb-md">
+              <h3 class="t-title">Dev Profiles</h3>
+              <button class="btn btn-ghost btn-sm" onclick="openNewDev()">+ Add</button>
+            </div>
+
+            <div class="flex-col gap-sm">
+              <div class="task-card card-sm">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-sm">
+                    <div class="avatar">FG</div>
+                    <div>
+                      <div class="t-small" style="font-weight:500">Filippo Gentile</div>
+                      <div class="t-tiny t-very-muted">Frontend · Junior</div>
+                    </div>
+                  </div>
+                  <button class="icon-btn" title="Copy link">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4H4a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2M9 2h5v5M14 2L8 8"/></svg>
+                  </button>
+                </div>
+                <div class="t-mono" style="font-size:0.625rem; color:var(--text-muted); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">
+                  /dev/a3f9e2b1-...
+                </div>
+              </div>
+
+              <div class="task-card card-sm">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-sm">
+                    <div class="avatar">SR</div>
+                    <div>
+                      <div class="t-small" style="font-weight:500">Sara Ricci</div>
+                      <div class="t-tiny t-very-muted">Backend · Senior</div>
+                    </div>
+                  </div>
+                  <button class="icon-btn" title="Copy link">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4H4a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2M9 2h5v5M14 2L8 8"/></svg>
+                  </button>
+                </div>
+                <div class="t-mono" style="font-size:0.625rem; color:var(--text-muted); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">
+                  /dev/c7d4a1f0-...
+                </div>
+              </div>
+
+              <div class="task-card card-sm">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-sm">
+                    <div class="avatar">MC</div>
+                    <div>
+                      <div class="t-small" style="font-weight:500">Marco Conti</div>
+                      <div class="t-tiny t-very-muted">Backend · Mid</div>
+                    </div>
+                  </div>
+                  <button class="icon-btn" title="Copy link">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4H4a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2M9 2h5v5M14 2L8 8"/></svg>
+                  </button>
+                </div>
+                <div class="t-mono" style="font-size:0.625rem; color:var(--text-muted); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">
+                  /dev/e2b8c3d9-...
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">New Task</h3>
+      <button class="icon-btn" onclick="closeTaskModal()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Task Title</label>
+        <input type="text" class="form-input" placeholder="e.g. Implement check-in API endpoint">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" placeholder="Short description of the work..."></textarea>
+      </div>
+      <div class="grid-2" style="gap:var(--spacing-md)">
+        <div class="form-group">
+          <label class="form-label">Assign to</label>
+          <select class="form-select">
+            <option>Filippo Gentile</option>
+            <option>Sara Ricci</option>
+            <option>Marco Conti</option>
+            <option>Luca Bianchi</option>
+            <option>Anna Moretti</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="form-select">
+            <option>1 — Critical</option>
+            <option>2 — High</option>
+            <option>3 — Normal</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority Rationale <span style="color:var(--text-muted);font-style:italic;font-family:var(--font-body);text-transform:none;letter-spacing:0">(shown to the dev)</span></label>
+        <textarea class="form-textarea" placeholder="Explain why this task matters this sprint..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeTaskModal()">Cancel</button>
+      <button class="btn btn-primary">Add to Backlog</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openNewTask() {
+  document.getElementById('taskModal').classList.add('open');
+}
+function closeTaskModal() {
+  document.getElementById('taskModal').classList.remove('open');
+}
+document.getElementById('taskModal').addEventListener('click', function(e) {
+  if (e.target === this) closeTaskModal();
+});
+</script>
+</body>
+</html>

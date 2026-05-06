@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — End-of-day Retrospective</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.dev-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 680px) 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+.dev-header {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 14px var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dev-main {
+  grid-column: 2;
+  padding: var(--spacing-2xl) 0;
+}
+
+.retro-hero {
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.retro-label-large {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.15;
+  margin-bottom: var(--spacing-sm);
+}
+
+.sprint-chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 4px 12px;
+}
+
+.time-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: rgba(200,120,42,0.08);
+  border: 1px solid rgba(200,120,42,0.2);
+  border-radius: 100px;
+  padding: 5px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-light);
+  margin-bottom: var(--spacing-md);
+}
+
+.retro-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+  transition: border-color 0.2s;
+}
+
+.retro-card-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+}
+
+.checkin-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid;
+  margin-top: 4px;
+}
+
+.outcome-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+}
+
+.outcome-opt {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+}
+
+.outcome-opt:hover {
+  border-color: var(--border-accent);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.outcome-opt.sel-done     { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+.outcome-opt.sel-progress { border-color: var(--yellow); background: var(--yellow-dim); color: var(--yellow); }
+.outcome-opt.sel-not      { border-color: var(--text-muted); background: rgba(255,255,255,0.03); color: var(--text-muted); }
+
+.outcome-icon { font-size: 1.375rem; line-height: 1; }
+.outcome-label { font-size: 0.8125rem; font-weight: 500; text-align: center; }
+
+.notes-area { padding: 0 var(--spacing-lg) var(--spacing-lg); }
+
+.day-summary {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.day-summary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent), var(--accent-dim));
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-row:last-child { border-bottom: none; }
+
+.submit-section {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-light), transparent);
+}
+
+.submitted-state { display: none; }
+.submit-section.done .pre-submit { display: none; }
+.submit-section.done .submitted-state { display: block; }
+
+.final-headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin-bottom: var(--spacing-sm);
+}
+</style>
+</head>
+<body>
+<div class="dev-shell">
+
+  <header class="dev-header">
+    <div class="logo-mark" style="font-size:1.25rem">Oggi</div>
+    <div class="flex items-center gap-md">
+      <div class="sprint-chip">Sprint 4 · May 5–16</div>
+      <a href="dev.html" class="btn btn-ghost btn-sm">← My Day</a>
+    </div>
+  </header>
+
+  <main class="dev-main">
+
+    <!-- Hero -->
+    <div class="retro-hero anim-fade-up">
+      <div class="time-pill">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-4 3 3 5-6"/></svg>
+        End of day · 17:00
+      </div>
+      <div class="retro-label-large">How did today go, Filippo?</div>
+      <div class="t-body t-muted">Mark each committed task with today's honest outcome. This is your data — it helps you and Valentina plan better.</div>
+    </div>
+
+    <!-- Day Summary Widget -->
+    <div class="day-summary anim-fade-up anim-delay-1">
+      <div class="t-tiny t-very-muted mb-md">Today's overview</div>
+      <div class="summary-row">
+        <span class="t-small t-muted">Committed tasks</span>
+        <span class="t-mono" style="font-size:0.875rem">2</span>
+      </div>
+      <div class="summary-row">
+        <span class="t-small t-muted">Mid-day status</span>
+        <span class="badge badge-green" style="font-size:0.6875rem">On Track (1) · Blocked (1)</span>
+      </div>
+      <div class="summary-row">
+        <span class="t-small t-muted">Sprint day</span>
+        <span class="t-mono" style="font-size:0.875rem; color:var(--text-muted)">Day 2 of 10</span>
+      </div>
+    </div>
+
+    <!-- Retro Cards -->
+    <div id="retroCards">
+
+      <!-- Task 1 -->
+      <div class="retro-card anim-fade-up anim-delay-2" id="r1">
+        <div class="retro-card-header">
+          <div style="flex:1">
+            <div class="flex items-center gap-sm mb-xs">
+              <span class="badge badge-muted" style="font-size:0.6875rem">#1 · Priority 1</span>
+            </div>
+            <div style="font-size:0.9375rem; font-weight:500">Implement morning commitment flow</div>
+            <div class="checkin-summary badge-green" style="background:var(--green-dim); border-color:rgba(76,175,125,0.2); color:var(--green); margin-top:6px; display:inline-flex">
+              <span>✓</span> Check-in: On Track
+            </div>
+          </div>
+        </div>
+        <div class="outcome-options">
+          <button class="outcome-opt sel-done" onclick="selectOutcome('r1', 'done', this)">
+            <div class="outcome-icon">✓</div>
+            <div class="outcome-label">Done</div>
+          </button>
+          <button class="outcome-opt" onclick="selectOutcome('r1', 'progress', this)">
+            <div class="outcome-icon">◑</div>
+            <div class="outcome-label">In Progress</div>
+          </button>
+          <button class="outcome-opt" onclick="selectOutcome('r1', 'not', this)">
+            <div class="outcome-icon">○</div>
+            <div class="outcome-label">Not Started</div>
+          </button>
+        </div>
+        <div class="notes-area">
+          <div class="form-group">
+            <label class="form-label">Any note? <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;font-family:var(--font-body)">optional</span></label>
+            <textarea class="form-textarea" style="min-height:64px" placeholder="What helped you get this done? Anything to remember?"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task 2 -->
+      <div class="retro-card anim-fade-up anim-delay-3" id="r2">
+        <div class="retro-card-header">
+          <div style="flex:1">
+            <div class="flex items-center gap-sm mb-xs">
+              <span class="badge badge-muted" style="font-size:0.6875rem">#2 · Priority 2</span>
+            </div>
+            <div style="font-size:0.9375rem; font-weight:500">Dev daily view — task list component</div>
+            <div class="checkin-summary" style="background:var(--red-dim); border-color:rgba(224,90,78,0.2); color:var(--red); margin-top:6px; display:inline-flex">
+              <span>⚑</span> Check-in: Blocked
+            </div>
+          </div>
+        </div>
+        <div class="outcome-options">
+          <button class="outcome-opt" onclick="selectOutcome('r2', 'done', this)">
+            <div class="outcome-icon">✓</div>
+            <div class="outcome-label">Done</div>
+          </button>
+          <button class="outcome-opt sel-progress" onclick="selectOutcome('r2', 'progress', this)">
+            <div class="outcome-icon">◑</div>
+            <div class="outcome-label">In Progress</div>
+          </button>
+          <button class="outcome-opt" onclick="selectOutcome('r2', 'not', this)">
+            <div class="outcome-icon">○</div>
+            <div class="outcome-label">Not Started</div>
+          </button>
+        </div>
+        <div class="notes-area">
+          <div class="form-group">
+            <label class="form-label">What was the blocker?</label>
+            <textarea class="form-textarea" style="min-height:64px" placeholder="Describe the blocker and whether it's resolved...">Realtime subscription was Sara's dependency — she sorted it around 15:00, I could unblock after that but ran out of time.</textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-section" id="submitSection">
+      <div class="pre-submit">
+        <div class="final-headline">Close your day</div>
+        <div class="t-body t-muted mb-lg">Your retrospective will be visible to Valentina. Honest data is more valuable than perfect data.</div>
+        <button class="btn btn-primary btn-lg" onclick="submitRetro()">Submit retrospective</button>
+      </div>
+      <div class="submitted-state">
+        <div style="font-size:2.5rem; margin-bottom:var(--spacing-sm)">☀</div>
+        <div class="final-headline" style="color:var(--accent-light)">Day closed.</div>
+        <div class="t-body t-muted mt-sm mb-lg">Great work today, Filippo. See you tomorrow.</div>
+        <div class="flex gap-sm" style="justify-content:center">
+          <a href="dev.html" class="btn btn-secondary">Tomorrow's view</a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function selectOutcome(cardId, outcome, btn) {
+  const card = document.getElementById(cardId);
+  card.querySelectorAll('.outcome-opt').forEach(b => {
+    b.classList.remove('sel-done', 'sel-progress', 'sel-not');
+  });
+  btn.classList.add('sel-' + outcome);
+}
+
+function submitRetro() {
+  document.getElementById('submitSection').classList.add('done');
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Daily View</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+body { background: var(--bg-primary); }
+
+.dev-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 680px) 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+.dev-header {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 14px var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dev-main {
+  grid-column: 2;
+  padding: var(--spacing-2xl) 0 var(--spacing-2xl);
+}
+
+.hero-date {
+  margin-bottom: var(--spacing-xl);
+}
+
+.oggi-label {
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 12vw, 8rem);
+  line-height: 0.9;
+  color: var(--accent-light);
+  letter-spacing: -0.04em;
+  display: block;
+}
+
+.date-line {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin-top: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.date-line::before {
+  content: '';
+  display: block;
+  height: 1px;
+  width: 40px;
+  background: var(--border-accent);
+}
+
+.sprint-chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 4px 12px;
+}
+
+.greeting {
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.greeting-name {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-sm);
+}
+
+.greeting-sub {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+.tasks-section { margin-bottom: var(--spacing-xl); }
+
+.section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.section-eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.priority-task {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  position: relative;
+  margin-bottom: var(--spacing-sm);
+}
+
+.priority-task:hover {
+  border-color: var(--border-accent);
+  background: var(--bg-card-hover);
+}
+
+.priority-task.selected {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 1px var(--accent-dim), inset 0 0 0 1px rgba(200,120,42,0.08);
+}
+
+.priority-task.selected .check-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.priority-task.selected .check-box svg { display: block; }
+
+.task-num {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.priority-task.selected .task-num {
+  color: var(--accent-light);
+  border-color: var(--border-accent);
+}
+
+.task-body { flex: 1; }
+
+.task-title-dev {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.4;
+}
+
+.rationale-block {
+  background: var(--accent-dim);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.rationale-author {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.rationale-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.check-box {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-accent);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.check-box svg { display: none; }
+
+.commit-section {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.commit-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.commit-count {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: var(--accent-light);
+  line-height: 1;
+  margin-bottom: var(--spacing-sm);
+}
+
+.commit-cta {
+  margin-top: var(--spacing-lg);
+}
+
+.committed-state { display: none; }
+.committed-state.show { display: block; }
+.commit-section.committed .pre-commit { display: none; }
+.commit-section.committed .committed-state { display: block; }
+
+@keyframes checkIn {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.check-anim { animation: checkIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+</style>
+</head>
+<body>
+<div class="dev-shell">
+
+  <!-- Header -->
+  <header class="dev-header">
+    <div class="logo-mark" style="font-size:1.25rem">Oggi</div>
+    <div class="flex items-center gap-md">
+      <div class="sprint-chip">Sprint 4 · May 5–16</div>
+      <a href="checkin.html" class="btn btn-secondary btn-sm">Mid-day Check-in →</a>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="dev-main">
+
+    <!-- Hero Date -->
+    <div class="hero-date anim-fade-up">
+      <span class="oggi-label">Oggi</span>
+      <div class="date-line">Tuesday, May 6, 2026</div>
+    </div>
+
+    <!-- Greeting -->
+    <div class="greeting anim-fade-up anim-delay-1">
+      <div class="greeting-name">Good morning, Filippo.</div>
+      <div class="greeting-sub">You have <strong style="color:var(--text-primary)">2 tasks</strong> assigned this sprint. Pick the ones you'll focus on today — one commitment, made in the morning, changes everything.</div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="tasks-section anim-fade-up anim-delay-2">
+      <div class="section-eyebrow">Your tasks · Sprint 4</div>
+
+      <!-- Task 1 -->
+      <div class="priority-task selected" onclick="toggleTask(this)" id="t1">
+        <div class="task-num">1</div>
+        <div class="task-body">
+          <div class="task-title-dev">Implement morning commitment flow</div>
+          <div class="flex gap-sm mt-xs">
+            <span class="badge badge-accent">Priority 1</span>
+            <span class="badge badge-muted">Frontend</span>
+          </div>
+          <div class="rationale-block mt-sm">
+            <div class="rationale-author">Valentina · Why this task?</div>
+            <div class="rationale-text">This is the core retention mechanic — if we don't validate the commitment UX this sprint, we block the entire dev experience. Do this first.</div>
+          </div>
+        </div>
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg>
+        </div>
+      </div>
+
+      <!-- Task 2 -->
+      <div class="priority-task" onclick="toggleTask(this)" id="t2">
+        <div class="task-num">2</div>
+        <div class="task-body">
+          <div class="task-title-dev">Dev daily view — task list component</div>
+          <div class="flex gap-sm mt-xs">
+            <span class="badge badge-yellow">Priority 2</span>
+            <span class="badge badge-muted">Frontend</span>
+          </div>
+          <div class="rationale-block mt-sm">
+            <div class="rationale-author">Valentina · Why this task?</div>
+            <div class="rationale-text">Sara needs this component working to test her Realtime integration. It's a dependency — unblock her if you can.</div>
+          </div>
+        </div>
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg>
+        </div>
+      </div>
+
+      <!-- Task 3 -->
+      <div class="priority-task" onclick="toggleTask(this)" id="t3">
+        <div class="task-num">3</div>
+        <div class="task-body">
+          <div class="task-title-dev">Auth callback UI — loading state polish</div>
+          <div class="flex gap-sm mt-xs">
+            <span class="badge badge-muted">Priority 3</span>
+            <span class="badge badge-muted">Frontend</span>
+          </div>
+          <div class="rationale-block mt-sm">
+            <div class="rationale-author">Valentina · Why this task?</div>
+            <div class="rationale-text">Nice to have for the demo. Only pick this up if you close task 1 and 2 early — not a blocker for the sprint.</div>
+          </div>
+        </div>
+        <div class="check-box">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Commit Section -->
+    <div class="commit-section" id="commitSection">
+      <div class="pre-commit">
+        <div class="commit-count" id="commitCount">1</div>
+        <div class="t-small t-muted">task selected for today</div>
+        <div class="commit-cta">
+          <button class="btn btn-primary btn-lg" onclick="commitDay()" id="commitBtn">
+            Commit to my day
+          </button>
+          <div class="t-small t-very-muted mt-sm">This is your daily contract. You can update it at the mid-day check-in.</div>
+        </div>
+      </div>
+      <div class="committed-state">
+        <div style="font-size:2.5rem; margin-bottom:var(--spacing-sm)">✓</div>
+        <div class="t-title" style="color:var(--green); font-family:var(--font-display)">Committed.</div>
+        <div class="t-small t-muted mt-sm">Your daily contract is set. Mid-day check-in unlocks at 12:00.</div>
+        <a href="checkin.html" class="btn btn-secondary mt-lg">Go to Check-in</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const tasks = { t1: true, t2: false, t3: false };
+
+function toggleTask(el) {
+  const id = el.id;
+  tasks[id] = !tasks[id];
+  el.classList.toggle('selected', tasks[id]);
+  updateCount();
+}
+
+function updateCount() {
+  const count = Object.values(tasks).filter(Boolean).length;
+  document.getElementById('commitCount').textContent = count;
+  const btn = document.getElementById('commitBtn');
+  const label = document.querySelector('#commitSection .t-small.t-muted');
+  if (count === 0) {
+    btn.disabled = true;
+    btn.style.opacity = '0.4';
+    label.textContent = 'Select at least one task';
+  } else {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    label.textContent = count === 1 ? 'task selected for today' : 'tasks selected for today';
+  }
+}
+
+function commitDay() {
+  document.getElementById('commitSection').classList.add('committed');
+}
+
+updateCount();
+</script>
+</body>
+</html>

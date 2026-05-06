@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oggi — Team Dashboard</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.live-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 8px 16px;
+  background: var(--green-dim);
+  border: 1px solid rgba(76,175,125,0.2);
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--green);
+}
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
+}
+.dev-status-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.dev-status-card:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-md);
+}
+.dev-status-card.has-blocker {
+  border-color: rgba(224,90,78,0.35);
+  box-shadow: 0 0 0 1px rgba(224,90,78,0.1);
+}
+.dev-status-card.silent {
+  border-color: rgba(232,200,74,0.25);
+}
+.card-top {
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+}
+.dev-avatar-lg {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-light);
+  flex-shrink: 0;
+}
+.card-body { padding: var(--spacing-md) var(--spacing-lg); }
+.current-task {
+  margin-bottom: var(--spacing-md);
+}
+.task-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-xs);
+}
+.current-task-name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.blocker-box {
+  background: var(--red-dim);
+  border: 1px solid rgba(224,90,78,0.2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+.blocker-label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--red);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.blocker-text {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.card-footer {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.checkin-time {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+.commitment-mini {
+  display: flex;
+  gap: 4px;
+  margin-top: var(--spacing-sm);
+}
+.commit-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+}
+.commit-dot.done   { background: var(--green); }
+.commit-dot.active { background: var(--accent-light); }
+.commit-dot.blocked { background: var(--red); }
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.alert-banner {
+  background: var(--red-dim);
+  border: 1px solid rgba(224,90,78,0.25);
+  border-radius: var(--radius-md);
+  padding: 12px var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+.alert-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(224,90,78,0.15);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--red);
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">Oggi</div>
+      <div class="logo-sub">Daily Focus Tool</div>
+    </div>
+    <nav>
+      <div class="nav-section">
+        <div class="nav-label">Management</div>
+        <a href="index.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
+            <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
+          </svg>
+          Sprint &amp; Backlog
+        </a>
+        <a href="team.html" class="nav-item active">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="6" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/>
+            <path d="M1 13c0-2.2 2.2-4 5-4M7 13c0-2.2 2.2-4 5-4"/>
+          </svg>
+          Team Dashboard
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Preview</div>
+        <a href="dev.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="3" width="14" height="10" rx="1.5"/>
+            <path d="M5 8h6M5 10.5h4"/>
+          </svg>
+          Dev View
+        </a>
+        <a href="checkin.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5l2 2"/>
+          </svg>
+          Check-in
+        </a>
+        <a href="retro.html" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 12l4-4 3 3 5-6"/><circle cx="13" cy="5" r="1"/>
+          </svg>
+          Retrospective
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">VR</div>
+        <div>
+          <div class="t-small" style="font-weight:500">Valentina Reyna</div>
+          <div class="t-tiny t-very-muted">Manager</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-container">
+
+      <!-- Header -->
+      <div class="page-header anim-fade-up">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="page-eyebrow">Sprint 4 — May 6, 2026</div>
+            <div class="flex items-center gap-md">
+              <h1 class="t-headline">Team Dashboard</h1>
+            </div>
+          </div>
+          <div class="live-bar">
+            <span class="live-dot"></span>
+            Live · Updated just now
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Banner -->
+      <div class="alert-banner anim-fade-up anim-delay-1">
+        <div class="alert-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2L1.5 13h13L8 2z"/><path d="M8 7v3"/><circle cx="8" cy="12" r="0.5" fill="currentColor"/></svg>
+        </div>
+        <div>
+          <div class="t-small" style="font-weight:500; color:var(--red)">1 developer has not responded to mid-day check-in</div>
+          <div class="t-small t-muted">Marco Conti — silent since 12:00. Marked as Silent automatically.</div>
+        </div>
+        <button class="btn btn-sm" style="margin-left:auto; background:rgba(224,90,78,0.15); color:var(--red); border-color:rgba(224,90,78,0.3)">Ping Marco</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-row anim-fade-up anim-delay-2">
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--green)">3</div>
+          <div class="t-tiny t-very-muted">On Track</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--red)">1</div>
+          <div class="t-tiny t-very-muted">Blocked</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--yellow)">1</div>
+          <div class="t-tiny t-very-muted">Silent</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--text-secondary)">0</div>
+          <div class="t-tiny t-very-muted">No Commitment</div>
+        </div>
+      </div>
+
+      <!-- Team Grid -->
+      <div class="team-grid">
+
+        <!-- Filippo — On Track -->
+        <div class="dev-status-card anim-fade-up anim-delay-1">
+          <div class="card-top">
+            <div class="dev-avatar-lg">FG</div>
+            <div style="flex:1">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div style="font-weight:500">Filippo Gentile</div>
+                  <div class="t-tiny t-very-muted">Frontend · Junior</div>
+                </div>
+                <span class="badge badge-green badge-dot">On Track</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="current-task">
+              <div class="task-label">Working on</div>
+              <div class="current-task-name">Implement morning commitment flow</div>
+            </div>
+            <div>
+              <div class="task-label">Today's commitment</div>
+              <div class="commitment-mini">
+                <div class="commit-dot done" title="Done"></div>
+                <div class="commit-dot active" title="In progress"></div>
+              </div>
+              <div class="t-tiny t-very-muted mt-xs">1 done · 1 in progress</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="checkin-time">Check-in at 12:30</span>
+            <span class="badge badge-muted">Retro pending</span>
+          </div>
+        </div>
+
+        <!-- Sara — Blocked -->
+        <div class="dev-status-card has-blocker anim-fade-up anim-delay-2">
+          <div class="card-top">
+            <div class="dev-avatar-lg" style="background:rgba(224,90,78,0.12); border-color:rgba(224,90,78,0.3); color:var(--red)">SR</div>
+            <div style="flex:1">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div style="font-weight:500">Sara Ricci</div>
+                  <div class="t-tiny t-very-muted">Backend · Senior</div>
+                </div>
+                <span class="badge badge-red badge-dot">Blocked</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="current-task">
+              <div class="task-label">Working on</div>
+              <div class="current-task-name">Team dashboard real-time grid</div>
+            </div>
+            <div class="blocker-box">
+              <div class="blocker-label">Blocker</div>
+              <div class="blocker-text">"Supabase Realtime subscription not firing on nested JSON — need to check with Marco"</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="checkin-time">Check-in at 12:28</span>
+            <button class="btn btn-sm" style="background:rgba(224,90,78,0.1); color:var(--red); border-color:rgba(224,90,78,0.2)">View blocker</button>
+          </div>
+        </div>
+
+        <!-- Marco — Silent -->
+        <div class="dev-status-card silent anim-fade-up anim-delay-3">
+          <div class="card-top">
+            <div class="dev-avatar-lg" style="background:var(--yellow-dim); border-color:rgba(232,200,74,0.3); color:var(--yellow)">MC</div>
+            <div style="flex:1">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div style="font-weight:500">Marco Conti</div>
+                  <div class="t-tiny t-very-muted">Backend · Mid</div>
+                </div>
+                <span class="badge badge-yellow badge-dot">Silent</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="current-task">
+              <div class="task-label">Committed to</div>
+              <div class="current-task-name">Mid-day check-in reminder logic</div>
+            </div>
+            <div class="blocker-box" style="background:var(--yellow-dim); border-color:rgba(232,200,74,0.2)">
+              <div class="blocker-label" style="color:var(--yellow)">No Response</div>
+              <div class="blocker-text">No check-in received after 2 hours (expected at 12:00)</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="checkin-time">Last seen: 09:15</span>
+            <span class="badge badge-yellow">Auto-flagged</span>
+          </div>
+        </div>
+
+        <!-- Luca — On Track -->
+        <div class="dev-status-card anim-fade-up anim-delay-4">
+          <div class="card-top">
+            <div class="dev-avatar-lg">LB</div>
+            <div style="flex:1">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div style="font-weight:500">Luca Bianchi</div>
+                  <div class="t-tiny t-very-muted">Backend · Mid</div>
+                </div>
+                <span class="badge badge-green badge-dot">On Track</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="current-task">
+              <div class="task-label">Working on</div>
+              <div class="current-task-name">Prisma schema — Sprint &amp; Task models</div>
+            </div>
+            <div>
+              <div class="task-label">Today's commitment</div>
+              <div class="commitment-mini">
+                <div class="commit-dot done"></div>
+                <div class="commit-dot done"></div>
+                <div class="commit-dot active"></div>
+              </div>
+              <div class="t-tiny t-very-muted mt-xs">2 done · 1 in progress</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="checkin-time">Check-in at 12:25</span>
+            <span class="badge badge-muted">Retro pending</span>
+          </div>
+        </div>
+
+        <!-- Anna — On Track -->
+        <div class="dev-status-card anim-fade-up anim-delay-5">
+          <div class="card-top">
+            <div class="dev-avatar-lg">AM</div>
+            <div style="flex:1">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div style="font-weight:500">Anna Moretti</div>
+                  <div class="t-tiny t-very-muted">Frontend · Junior</div>
+                </div>
+                <span class="badge badge-blue badge-dot">Task Changed</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="current-task">
+              <div class="task-label">Changed to</div>
+              <div class="current-task-name">Dev profile management UI</div>
+            </div>
+            <div class="blocker-box" style="background:var(--blue-dim); border-color:rgba(91,150,224,0.2)">
+              <div class="blocker-label" style="color:var(--blue)">Context change</div>
+              <div class="blocker-text">"Prod bug on auth callback — switched to hotfix before the planned task"</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="checkin-time">Check-in at 12:41</span>
+            <span class="badge badge-blue">Task changed</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
