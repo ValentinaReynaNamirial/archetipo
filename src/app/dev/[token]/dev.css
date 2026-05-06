@@ -1,0 +1,359 @@
+.oggi-scope .dev-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 720px) 1fr;
+  grid-template-rows: auto 1fr auto;
+  background: var(--bg-primary);
+}
+
+.oggi-scope .dev-header {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 14px var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+}
+
+.oggi-scope .brand-block { display: flex; align-items: baseline; gap: var(--spacing-sm); }
+.oggi-scope .brand-mark {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--accent-light);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.oggi-scope .brand-sub {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.oggi-scope .dev-identity { display: flex; align-items: center; gap: var(--spacing-md); }
+.oggi-scope .identity-text { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2; }
+.oggi-scope .identity-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.oggi-scope .identity-meta { display: flex; align-items: center; gap: var(--spacing-sm); margin-top: 4px; }
+.oggi-scope .identity-role {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.oggi-scope .identity-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--accent-light);
+}
+
+.oggi-scope .dev-main { grid-column: 2; padding: var(--spacing-2xl) 0; }
+
+.oggi-scope .hero { margin-bottom: var(--spacing-xl); position: relative; }
+.oggi-scope .oggi-mark {
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 12vw, 8rem);
+  line-height: 0.9;
+  color: var(--accent-light);
+  letter-spacing: -0.04em;
+  display: block;
+}
+.oggi-scope .date-line {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin-top: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+.oggi-scope .date-line::before {
+  content: '';
+  display: block;
+  height: 1px;
+  width: 40px;
+  background: var(--border-accent);
+}
+
+.oggi-scope .greeting {
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+}
+.oggi-scope .greeting-name {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+  letter-spacing: -0.01em;
+}
+.oggi-scope .greeting-name em { font-style: italic; color: var(--accent-light); }
+.oggi-scope .greeting-sub {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 540px;
+  line-height: 1.65;
+}
+.oggi-scope .greeting-sub strong { color: var(--text-primary); font-weight: 500; }
+
+.oggi-scope .placeholder-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+.oggi-scope .placeholder-eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.oggi-scope .placeholder-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.oggi-scope .placeholder-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(200,120,42,0.05), transparent 45%),
+    radial-gradient(circle at 80% 100%, rgba(200,120,42,0.04), transparent 45%);
+  pointer-events: none;
+}
+.oggi-scope .placeholder-glyph {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px dashed var(--border-accent);
+  margin-bottom: var(--spacing-lg);
+  color: var(--accent);
+}
+.oggi-scope .placeholder-glyph::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+.oggi-scope .placeholder-title {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: -0.01em;
+}
+.oggi-scope .placeholder-text {
+  position: relative;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  max-width: 380px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.oggi-scope .placeholder-meta {
+  position: relative;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.oggi-scope .placeholder-meta .live-dot { background: var(--accent); }
+
+.oggi-scope .dev-foot {
+  grid-column: 2;
+  padding: 0 0 var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.oggi-scope .foot-token {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-transform: none;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+.oggi-scope .foot-token-value {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.oggi-scope .header-status {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--red);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+.oggi-scope .header-status .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+.oggi-scope .invalid-main {
+  grid-column: 2;
+  padding: var(--spacing-2xl) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.oggi-scope .invalid-glyph {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin-bottom: var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.oggi-scope .invalid-glyph::before,
+.oggi-scope .invalid-glyph::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+}
+.oggi-scope .invalid-glyph::before { inset: 0; opacity: 0.7; }
+.oggi-scope .invalid-glyph::after { inset: 14px; border-color: var(--border-accent); }
+.oggi-scope .invalid-glyph .core {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--red-dim);
+  border: 1px solid rgba(224,90,78,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--red);
+}
+.oggi-scope .invalid-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--red);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+}
+.oggi-scope .invalid-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--spacing-lg);
+  max-width: 520px;
+}
+.oggi-scope .invalid-title em { font-style: italic; color: var(--accent-light); }
+.oggi-scope .invalid-text {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  max-width: 480px;
+  margin-bottom: var(--spacing-xl);
+}
+.oggi-scope .help-block {
+  border-top: 1px solid var(--border);
+  padding-top: var(--spacing-xl);
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+.oggi-scope .help-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-xs);
+}
+.oggi-scope .help-text {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.oggi-scope .help-text strong { color: var(--text-primary); font-weight: 500; }
+
+.oggi-scope .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.oggi-scope .badge-accent {
+  background: var(--accent-dim);
+  color: var(--accent-light);
+  border: 1px solid rgba(200,120,42,0.25);
+}
+
+@keyframes oggiFadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.oggi-scope .anim-fade-up { animation: oggiFadeInUp 0.4s ease both; }
+.oggi-scope .anim-delay-1 { animation-delay: 0.08s; }
+.oggi-scope .anim-delay-2 { animation-delay: 0.16s; }
+.oggi-scope .anim-delay-3 { animation-delay: 0.24s; }

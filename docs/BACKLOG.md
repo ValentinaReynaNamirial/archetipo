@@ -137,7 +137,7 @@ After implementing this story, the user can: drag a task to a new position in th
 #### US-005: Add a priority rationale note to a task
 
 **Epic:** EP-001 | **Priority:** HIGH | **Story Points:** 1
-**Status:** REVIEW
+**Status:** DONE
 
 **Story**
 As Valentina,
@@ -213,7 +213,7 @@ After implementing this story, the user can: open two dev pages co-assigned to t
 #### US-006: Open dev daily page via unique URL
 
 **Epic:** EP-002 | **Priority:** HIGH | **Story Points:** 2
-**Status:** PLANNED
+**Status:** REVIEW
 
 **Story**
 As Filippo,
@@ -327,6 +327,7 @@ After implementing this story, the user can: at the configured end-of-day time, 
 #### US-011: Auto-flag silent developers
 
 **Epic:** EP-003 | **Priority:** MEDIUM | **Story Points:** 2
+**Status:** PLANNED
 
 **Story**
 As Valentina,

@@ -1,4 +1,22 @@
+import { z } from "zod";
 import type { DevProfile, DevRole, DevSeniority } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
+
+const tokenSchema = z.string().uuid();
+
+type DevProfileFinder = Pick<PrismaClient["devProfile"], "findFirst">;
+
+export async function findActiveProfileByToken(
+  client: { devProfile: DevProfileFinder },
+  token: string
+): Promise<DevProfile | null> {
+  const parsed = tokenSchema.safeParse(token);
+  if (!parsed.success) return null;
+  return client.devProfile.findFirst({
+    where: { accessToken: parsed.data, isActive: true },
+  });
+}
+
 
 export function buildDevUrl(token: string, origin: string): string {
   const trimmed = origin.replace(/\/+$/, "");
