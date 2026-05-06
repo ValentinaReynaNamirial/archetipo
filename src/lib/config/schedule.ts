@@ -26,6 +26,7 @@ export type ScheduleConfig = {
   midDayMinute: number;
   endOfDayHour: number;
   endOfDayMinute: number;
+  silentThresholdHours: number;
   timezone: string;
 };
 
@@ -34,12 +35,14 @@ export const MID_DAY_HOUR = parseIntEnv("OGGI_MID_DAY_HOUR", 12, 0, 23);
 export const MID_DAY_MINUTE = parseIntEnv("OGGI_MID_DAY_MINUTE", 30, 0, 59);
 export const END_OF_DAY_HOUR = parseIntEnv("OGGI_END_OF_DAY_HOUR", 18, 0, 23);
 export const END_OF_DAY_MINUTE = parseIntEnv("OGGI_END_OF_DAY_MINUTE", 0, 0, 59);
+export const SILENT_THRESHOLD_HOURS = parseIntEnv("OGGI_SILENT_THRESHOLD_HOURS", 2, 0, 23);
 
 export const scheduleConfig: ScheduleConfig = {
   midDayHour: MID_DAY_HOUR,
   midDayMinute: MID_DAY_MINUTE,
   endOfDayHour: END_OF_DAY_HOUR,
   endOfDayMinute: END_OF_DAY_MINUTE,
+  silentThresholdHours: SILENT_THRESHOLD_HOURS,
   timezone: ORG_TIMEZONE,
 };
 
@@ -61,4 +64,8 @@ export function endOfDayMinutes(config: ScheduleConfig): number {
 
 export function midDayMinutes(config: ScheduleConfig): number {
   return config.midDayHour * 60 + config.midDayMinute;
+}
+
+export function silentThresholdMinutes(config: ScheduleConfig): number {
+  return midDayMinutes(config) + config.silentThresholdHours * 60;
 }

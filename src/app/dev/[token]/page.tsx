@@ -19,6 +19,7 @@ import { CommittedPlan } from "./_components/CommittedPlan";
 import { CommitmentLocked } from "./_components/CommitmentLocked";
 import { CheckInForm } from "./_components/CheckInForm";
 import { CheckInSummary } from "./_components/CheckInSummary";
+import { SilentBanner } from "./_components/SilentBanner";
 import { RetroForm } from "./_components/RetroForm";
 import { RetroSummary } from "./_components/RetroSummary";
 import "../../sprints/sprints.css";
@@ -109,8 +110,10 @@ export default async function DevDailyPage({
   const showCheckInForm =
     !forceEdit &&
     retroState === null &&
-    checkInState === "awaiting_checkin" &&
+    (checkInState === "awaiting_checkin" || checkInState === "silent_pending") &&
     commitment.taskIds.length > 0;
+  const showSilentBanner =
+    !forceEdit && retroState === null && checkInState === "silent_pending";
   const showCheckInSummary = !forceEdit && retroState === null && checkInState === "checked_in";
   const submittedAt = checkIns.length > 0 ? checkIns[0]!.submittedAt : null;
   const submittedTimeLabel = submittedAt
@@ -206,11 +209,14 @@ export default async function DevDailyPage({
               submittedDateLabel={submittedDateLabel}
             />
           ) : showCheckInForm ? (
-            <CheckInForm
-              token={token}
-              committedTasks={committedTasks}
-              devFirstName={firstName(profile.name)}
-            />
+            <>
+              {showSilentBanner ? <SilentBanner /> : null}
+              <CheckInForm
+                token={token}
+                committedTasks={committedTasks}
+                devFirstName={firstName(profile.name)}
+              />
+            </>
           ) : state === "locked" ? (
             <CommitmentLocked
               committedTasks={committedTasks}

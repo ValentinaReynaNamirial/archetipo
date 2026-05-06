@@ -1,5 +1,10 @@
 import type { PrismaClient, CheckInStatus } from "@prisma/client";
-import { endOfDayMinutes, midDayMinutes, type ScheduleConfig } from "./config/schedule";
+import {
+  endOfDayMinutes,
+  midDayMinutes,
+  silentThresholdMinutes,
+  type ScheduleConfig,
+} from "./config/schedule";
 
 const PARTS_TYPE = {
   hour: "2-digit",
@@ -42,6 +47,7 @@ export type CheckInEntry = {
 export type CheckInState =
   | "pre_checkin"
   | "awaiting_checkin"
+  | "silent_pending"
   | "checked_in"
   | "post_checkin";
 
@@ -54,9 +60,10 @@ export function mapCheckInState(
   const minutes = getMinutesInTz(now, config.timezone);
   if (minutes < midDayMinutes(config)) return "pre_checkin";
   if (minutes >= endOfDayMinutes(config)) return "post_checkin";
+  if (checkIns.length > 0) return "checked_in";
   if (committedTaskIds.length === 0) return "awaiting_checkin";
-  if (checkIns.length === 0) return "awaiting_checkin";
-  return "checked_in";
+  if (minutes >= silentThresholdMinutes(config)) return "silent_pending";
+  return "awaiting_checkin";
 }
 
 type CheckInFinder = Pick<PrismaClient["taskCheckIn"], "findMany">;

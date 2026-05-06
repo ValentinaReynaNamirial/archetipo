@@ -327,7 +327,7 @@ After implementing this story, the user can: at the configured end-of-day time, 
 #### US-011: Auto-flag silent developers
 
 **Epic:** EP-003 | **Priority:** MEDIUM | **Story Points:** 2
-**Status:** PLANNED
+**Status:** REVIEW
 
 **Story**
 As Valentina,

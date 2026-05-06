@@ -7,6 +7,7 @@ const ROME = {
   midDayMinute: 30,
   endOfDayHour: 18,
   endOfDayMinute: 0,
+  silentThresholdHours: 2,
   timezone: "Europe/Rome",
 };
 
@@ -71,4 +72,35 @@ test("mapCheckInState: post_checkin after end-of-day", () => {
 test("mapCheckInState: awaiting_checkin when no committed tasks (window open)", () => {
   const now = new Date("2026-05-06T11:00:00Z");
   assert.equal(mapCheckInState([], [], now, ROME), "awaiting_checkin");
+});
+
+test("mapCheckInState: awaiting_checkin one minute before silent threshold", () => {
+  // Rome midDay = 12:30 local (10:30 UTC summer DST), threshold = +2h = 14:30 local (12:30 UTC)
+  const now = new Date("2026-05-06T12:29:00Z");
+  assert.equal(mapCheckInState(COMMITTED, [], now, ROME), "awaiting_checkin");
+});
+
+test("mapCheckInState: silent_pending exactly at threshold with no submission", () => {
+  const now = new Date("2026-05-06T12:30:00Z");
+  assert.equal(mapCheckInState(COMMITTED, [], now, ROME), "silent_pending");
+});
+
+test("mapCheckInState: silent_pending past threshold with no submission", () => {
+  const now = new Date("2026-05-06T14:00:00Z");
+  assert.equal(mapCheckInState(COMMITTED, [], now, ROME), "silent_pending");
+});
+
+test("mapCheckInState: checked_in past threshold once a CheckIn exists (flip-back)", () => {
+  const now = new Date("2026-05-06T14:00:00Z");
+  assert.equal(mapCheckInState(COMMITTED, ENTRIES, now, ROME), "checked_in");
+});
+
+test("mapCheckInState: no silent_pending without commitment past threshold", () => {
+  const now = new Date("2026-05-06T14:00:00Z");
+  assert.equal(mapCheckInState([], [], now, ROME), "awaiting_checkin");
+});
+
+test("mapCheckInState: post_checkin overrides silent_pending after end-of-day", () => {
+  const now = new Date("2026-05-06T17:00:00Z");
+  assert.equal(mapCheckInState(COMMITTED, [], now, ROME), "post_checkin");
 });

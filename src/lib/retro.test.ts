@@ -8,6 +8,7 @@ const ROME = {
   midDayMinute: 30,
   endOfDayHour: 18,
   endOfDayMinute: 0,
+  silentThresholdHours: 2,
   timezone: "Europe/Rome",
 };
 
