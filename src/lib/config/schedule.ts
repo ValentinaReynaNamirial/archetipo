@@ -54,3 +54,11 @@ export function formatEndOfDayLabel(config: ScheduleConfig = scheduleConfig): st
   const mm = String(config.endOfDayMinute).padStart(2, "0");
   return `${hh}:${mm}`;
 }
+
+export function endOfDayMinutes(config: ScheduleConfig): number {
+  return config.endOfDayHour * 60 + config.endOfDayMinute;
+}
+
+export function midDayMinutes(config: ScheduleConfig): number {
+  return config.midDayHour * 60 + config.midDayMinute;
+}

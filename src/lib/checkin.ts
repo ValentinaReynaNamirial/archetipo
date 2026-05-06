@@ -1,5 +1,5 @@
 import type { PrismaClient, CheckInStatus } from "@prisma/client";
-import type { ScheduleConfig } from "./config/schedule";
+import { endOfDayMinutes, midDayMinutes, type ScheduleConfig } from "./config/schedule";
 
 const PARTS_TYPE = {
   hour: "2-digit",
@@ -25,9 +25,11 @@ function getMinutesInTz(now: Date, timezone: string): number {
 
 export function isCheckInOpen(now: Date, config: ScheduleConfig): boolean {
   const nowMinutes = getMinutesInTz(now, config.timezone);
-  const open = config.midDayHour * 60 + config.midDayMinute;
-  const close = config.endOfDayHour * 60 + config.endOfDayMinute;
-  return nowMinutes >= open && nowMinutes < close;
+  return nowMinutes >= midDayMinutes(config) && nowMinutes < endOfDayMinutes(config);
+}
+
+export function nowMinutesInOrgTz(now: Date, config: ScheduleConfig): number {
+  return getMinutesInTz(now, config.timezone);
 }
 
 export type CheckInEntry = {
@@ -50,10 +52,8 @@ export function mapCheckInState(
   config: ScheduleConfig
 ): CheckInState {
   const minutes = getMinutesInTz(now, config.timezone);
-  const open = config.midDayHour * 60 + config.midDayMinute;
-  const close = config.endOfDayHour * 60 + config.endOfDayMinute;
-  if (minutes < open) return "pre_checkin";
-  if (minutes >= close) return "post_checkin";
+  if (minutes < midDayMinutes(config)) return "pre_checkin";
+  if (minutes >= endOfDayMinutes(config)) return "post_checkin";
   if (committedTaskIds.length === 0) return "awaiting_checkin";
   if (checkIns.length === 0) return "awaiting_checkin";
   return "checked_in";

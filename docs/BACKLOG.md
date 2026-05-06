@@ -306,7 +306,7 @@ After implementing this story, the user can: at the configured mid-day time, ope
 #### US-010: Submit end-of-day retrospective
 
 **Epic:** EP-003 | **Priority:** HIGH | **Story Points:** 3
-**Status:** PLANNED
+**Status:** REVIEW
 
 **Story**
 As a developer,

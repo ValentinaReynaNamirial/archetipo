@@ -7,9 +7,11 @@ import { findActiveProfileByToken } from "@/lib/profile";
 import { getActiveSprintForOwner } from "@/lib/sprint";
 import { isCommitmentEditable, todayInOrgTz } from "@/lib/commitment";
 import { isCheckInOpen } from "@/lib/checkin";
+import { isRetroOpen } from "@/lib/retro";
 import { scheduleConfig } from "@/lib/config/schedule";
 import { confirmCommitmentSchema } from "@/lib/validation/commitment";
 import { submitCheckInSchema } from "@/lib/validation/checkin";
+import { submitRetroSchema } from "@/lib/validation/retro";
 
 export type ConfirmCommitmentState = {
   ok: boolean;
@@ -211,6 +213,121 @@ export async function submitCheckInAction(
       error.code === "P2002"
     ) {
       return { ok: false, formError: CHECKIN_ALREADY_SUBMITTED };
+    }
+    throw error;
+  }
+
+  revalidatePath(`/dev/${parsed.data.token}`);
+  return { ok: true };
+}
+
+export type SubmitRetroState = {
+  ok: boolean;
+  fieldError?: string;
+  formError?: string;
+};
+
+const RETRO_NEUTRAL_ERROR = "We couldn't save your retrospective. Please refresh and try again.";
+const RETRO_CLOSED_ERROR = "The retrospective isn't open yet.";
+const RETRO_INCOMPLETE_ERROR = "Mark every committed task before submitting.";
+const RETRO_ALREADY_SUBMITTED = "You've already closed today.";
+
+export async function submitRetroAction(
+  _prev: SubmitRetroState,
+  formData: FormData
+): Promise<SubmitRetroState> {
+  const token = String(formData.get("token") ?? "");
+  const payload = String(formData.get("entries") ?? "");
+
+  let parsedEntries: unknown;
+  try {
+    parsedEntries = JSON.parse(payload);
+  } catch {
+    return { ok: false, formError: RETRO_NEUTRAL_ERROR };
+  }
+
+  const parsed = submitRetroSchema.safeParse({ token, entries: parsedEntries });
+  if (!parsed.success) {
+    const flat = parsed.error.flatten();
+    const tokenErr = flat.fieldErrors.token?.[0];
+    const entriesErr = flat.fieldErrors.entries?.[0];
+    return {
+      ok: false,
+      fieldError: entriesErr,
+      formError: tokenErr ? RETRO_NEUTRAL_ERROR : entriesErr ? undefined : RETRO_NEUTRAL_ERROR,
+    };
+  }
+
+  const now = new Date();
+  if (!isRetroOpen(now, scheduleConfig)) {
+    return { ok: false, formError: RETRO_CLOSED_ERROR };
+  }
+
+  const profile = await findActiveProfileByToken(prisma, parsed.data.token);
+  if (!profile) {
+    return { ok: false, formError: RETRO_NEUTRAL_ERROR };
+  }
+
+  const sprint = await getActiveSprintForOwner(prisma, profile.ownerId, now);
+  if (!sprint) {
+    return { ok: false, formError: RETRO_NEUTRAL_ERROR };
+  }
+
+  const today = todayInOrgTz(now, scheduleConfig.timezone);
+
+  const committed = await prisma.dailyCommitment.findMany({
+    where: {
+      sprintDay: today,
+      task: {
+        sprintId: sprint.id,
+        assignees: { some: { devProfileId: profile.id } },
+      },
+    },
+    select: { taskId: true },
+  });
+  const committedSet = new Set(committed.map((r) => r.taskId));
+  if (committedSet.size === 0) {
+    return { ok: false, formError: RETRO_NEUTRAL_ERROR };
+  }
+
+  const entryTaskIds = parsed.data.entries.map((e) => e.taskId);
+  const entrySet = new Set(entryTaskIds);
+  if (
+    entrySet.size !== entryTaskIds.length ||
+    entrySet.size !== committedSet.size ||
+    [...entrySet].some((id) => !committedSet.has(id))
+  ) {
+    return { ok: false, formError: RETRO_INCOMPLETE_ERROR };
+  }
+
+  const existing = await prisma.taskRetro.findFirst({
+    where: {
+      devProfileId: profile.id,
+      sprintDay: today,
+      taskId: { in: [...committedSet] },
+    },
+    select: { taskId: true },
+  });
+  if (existing) {
+    return { ok: false, formError: RETRO_ALREADY_SUBMITTED };
+  }
+
+  try {
+    await prisma.taskRetro.createMany({
+      data: parsed.data.entries.map((e) => ({
+        taskId: e.taskId,
+        devProfileId: profile.id,
+        sprintDay: today,
+        outcome: e.outcome,
+      })),
+      skipDuplicates: false,
+    });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return { ok: false, formError: RETRO_ALREADY_SUBMITTED };
     }
     throw error;
   }

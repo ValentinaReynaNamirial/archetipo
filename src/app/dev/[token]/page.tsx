@@ -11,6 +11,7 @@ import {
 } from "@/lib/commitment";
 import { formatMidDayLabel, scheduleConfig } from "@/lib/config/schedule";
 import { findTodayCheckIns, mapCheckInState } from "@/lib/checkin";
+import { findTodayRetros, mapRetroState } from "@/lib/retro";
 import { InvalidLinkState } from "../_components/InvalidLinkState";
 import { TodayEmptyState } from "../_components/TodayEmptyState";
 import { CommitmentEditor } from "./_components/CommitmentEditor";
@@ -18,10 +19,13 @@ import { CommittedPlan } from "./_components/CommittedPlan";
 import { CommitmentLocked } from "./_components/CommitmentLocked";
 import { CheckInForm } from "./_components/CheckInForm";
 import { CheckInSummary } from "./_components/CheckInSummary";
+import { RetroForm } from "./_components/RetroForm";
+import { RetroSummary } from "./_components/RetroSummary";
 import "../../sprints/sprints.css";
 import "./dev.css";
 import "./commitment.css";
 import "./checkin.css";
+import "./retro.css";
 
 export const dynamic = "force-dynamic";
 
@@ -90,14 +94,36 @@ export default async function DevDailyPage({
         })
       : [];
   const checkInState = mapCheckInState(commitment.taskIds, checkIns, now, scheduleConfig);
+
+  const retros =
+    baseState === "locked" && commitment.taskIds.length > 0
+      ? await findTodayRetros(prisma, {
+          devProfileId: profile.id,
+          sprintDay: todayDate,
+        })
+      : [];
+  const retroState = mapRetroState(commitment.taskIds, retros, now, scheduleConfig);
+  const showRetroForm = !forceEdit && retroState === "awaiting_retro";
+  const showRetroSummary = !forceEdit && retroState === "day_closed";
+
   const showCheckInForm =
-    !forceEdit && checkInState === "awaiting_checkin" && commitment.taskIds.length > 0;
-  const showCheckInSummary = !forceEdit && checkInState === "checked_in";
+    !forceEdit &&
+    retroState === null &&
+    checkInState === "awaiting_checkin" &&
+    commitment.taskIds.length > 0;
+  const showCheckInSummary = !forceEdit && retroState === null && checkInState === "checked_in";
   const submittedAt = checkIns.length > 0 ? checkIns[0]!.submittedAt : null;
   const submittedTimeLabel = submittedAt
     ? formatTimeInTz(submittedAt, scheduleConfig.timezone)
     : "";
   const submittedDateLabel = submittedAt ? formatToday(submittedAt, scheduleConfig.timezone) : "";
+  const retroClosedAt = retros.length > 0 ? retros[0]!.submittedAt : null;
+  const retroClosedTimeLabel = retroClosedAt
+    ? formatTimeInTz(retroClosedAt, scheduleConfig.timezone)
+    : "";
+  const retroClosedDateLabel = retroClosedAt
+    ? formatToday(retroClosedAt, scheduleConfig.timezone)
+    : "";
   const dateLine = activeSprint ? `${today} · ${activeSprint.name}` : today;
   const midDayLabel = formatMidDayLabel(scheduleConfig);
   const planDateLabel = formatPlanDate(todayDate, scheduleConfig.timezone);
@@ -157,6 +183,20 @@ export default async function DevDailyPage({
 
           {tasks.length === 0 ? (
             <TodayEmptyState sprintLabel={activeSprint?.name ?? null} />
+          ) : showRetroSummary ? (
+            <RetroSummary
+              committedTasks={committedTasks}
+              retros={retros}
+              devFirstName={firstName(profile.name)}
+              closedTimeLabel={retroClosedTimeLabel}
+              closedDateLabel={retroClosedDateLabel}
+            />
+          ) : showRetroForm ? (
+            <RetroForm
+              token={token}
+              committedTasks={committedTasks}
+              devFirstName={firstName(profile.name)}
+            />
           ) : showCheckInSummary ? (
             <CheckInSummary
               committedTasks={committedTasks}
